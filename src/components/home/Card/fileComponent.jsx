@@ -5,17 +5,19 @@ import {
     Input,
     Box,
     Button,
-    Spinner
+    Spinner,
+    useToast,
+    Text
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { uploadFileService } from '../../service/tarea';
-import toast, { Toaster } from 'react-hot-toast';
-import { useLoadingFile } from '../../provider/loadingFileProvider';
+import { uploadFileService } from '../../../service/tarea';
+import { BsArrowUp } from 'react-icons/bs';
+import { FiX } from 'react-icons/fi';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB en bytes
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const FileComponent = ({ dataFile, colorScheme }) => {
-    const { setIsFile } = useLoadingFile()
+    const toast = useToast()
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
@@ -64,9 +66,24 @@ const FileComponent = ({ dataFile, colorScheme }) => {
                 Cuerpo: file.base64
             };
             const req = await uploadFileService(fileData);
-            toast(`${req.Errornombre}`, { position: 'bottom-right' });
-            setIsFile(true)
-            setFiles((prev) => prev.filter((f) => f !== file));
+            if (req.Errorid === "0") {
+                toast({
+                    title: "Se cargo correctamente el archivo",
+                    description: `El archivo: ${file.file} se cargo correctamente a la tarea: ${dataFile.id}`,
+                    status: "success",
+                    isClosable: true,
+                });
+            } else {
+                toast({
+                    title: "Error al cargar el archivo",
+                    description: `${req.Errornombre}`,
+                    status: "error",
+                    isClosable: true,
+                });
+            }
+            if (req.Errornombre) {
+                setFiles((prev) => prev.filter((f) => f !== file));
+            }
         } catch (error) {
             console.log('Error al subir archivos:', error);
         } finally {
@@ -76,7 +93,6 @@ const FileComponent = ({ dataFile, colorScheme }) => {
 
     return (
         <Box>
-            <Toaster />
             <FormControl isInvalid={!!errorMessage}>
                 <FormLabel>Archivos Adjuntos</FormLabel>
                 <Input
@@ -99,16 +115,17 @@ const FileComponent = ({ dataFile, colorScheme }) => {
                             <Spinner size='sm' />
                         ) : (
                             <span className='flex gap-2'>
-                                <Button size='sm' colorScheme={colorScheme} onClick={() => handleRemoveFile(file)}>Eliminar</Button>
+                                <Button size='sm' colorScheme={colorScheme} onClick={() => handleRemoveFile(file)}><FiX size={18} /></Button>
                                 <Button size='sm' colorScheme={colorScheme}
                                     onClick={() => handleSubmit(file)}
                                 >
-                                    Subir
+                                    <BsArrowUp size={18} />
                                 </Button>
                             </span>
                         )}
                     </Box>
                 ))}
+                <Text color={`${colorScheme}.400`} className='my-2 text-md font-semibold text-center'>Una vez cargados todos los archivos actualice la página</Text>
             </div>
         </Box>
     );

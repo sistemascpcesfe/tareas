@@ -1,7 +1,9 @@
-import { Button } from '@chakra-ui/react';
+import { Button, Tooltip, useToast } from '@chakra-ui/react';
+import { BsBoxArrowRight } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
 const LogoutButton = () => {
+    const toast = useToast()
     const navigate = useNavigate()
     const handleLogout = () => {
         localStorage.removeItem("user");
@@ -11,11 +13,21 @@ const LogoutButton = () => {
         localStorage.removeItem("type");
         localStorage.removeItem("mp");
         localStorage.removeItem("status");
+        toast({
+            title: 'Hasta Pronto.',
+            description: `Se cerro correctamente la sesión`,
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+        })
         navigate("/");
+        onclose();
     };
 
     return (
-        <Button colorScheme='red' onClick={handleLogout}>Cerrar Sesión</Button>
+        <Tooltip hasArrow placement='bottom' label="Cerrar sesión">
+            <Button colorScheme='red' onClick={handleLogout}><BsBoxArrowRight /></Button>
+        </Tooltip>
     );
 };
 

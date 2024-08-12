@@ -15,17 +15,13 @@ import {
     useToast
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { createTaskService, tagService, typesTasksService, usersService } from '../../service/tarea';
+import { createTaskService, tagService, usersService } from '../../../service/tarea';
 import dayjs from 'dayjs';
-import { useTask } from '../../provider/taskProvider';
-import { useNavigate } from 'react-router-dom';
 
-const FormComponent = () => {
-    const navigate = useNavigate()
+
+const FormDeriveComponent = ({ colorScheme, task }) => {
     const toast = useToast()
-    const { triggerUpdate } = useTask();
     const [tags, setTags] = useState([]);
-    const [types, setTypes] = useState([]);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState({});
@@ -34,7 +30,7 @@ const FormComponent = () => {
         title: '',
         description: '',
         selectedTags: [],
-        selectedType: '',
+        selectedType: task.tarea ?? "",
         selectedUsers: [],
         alcance: '',
     });
@@ -48,8 +44,6 @@ const FormComponent = () => {
             setLoading(true);
             const tagsRes = await tagService();
             setTags(tagsRes.tags);
-            const typesRes = await typesTasksService();
-            setTypes(typesRes.items);
             const usersRes = await usersService();
             setUsers(usersRes.items);
             setLoading(false);
@@ -88,10 +82,6 @@ const FormComponent = () => {
     const validate = () => {
         const newErrors = {};
 
-        if (!formData.date) {
-            newErrors.date = 'La fecha y hora son requeridos.';
-        }
-
         if (!formData.title) {
             newErrors.title = 'El asunto es requerido.';
         } else if (formData.title.length < 10) {
@@ -104,21 +94,12 @@ const FormComponent = () => {
             newErrors.description = 'La descripción debe tener un mínimo de 10 caracteres.';
         }
 
-        if (!formData.selectedType) {
-            newErrors.selectedType = 'El tipo es requerido.';
-        }
-
         if (formData.selectedTags.length === 0) {
             newErrors.selectedTags = 'Al menos un tag es requerido.';
         }
 
         if (formData.selectedUsers.length === 0) {
             newErrors.selectedUsers = 'Al menos un usuario es requerido.';
-        }
-
-        // Validación específica para alcance si el tipo es 3
-        if (formData.selectedType === '3' && !formData.alcance) {
-            newErrors.alcance = 'El alcance es requerido para este tipo de tarea.';
         }
 
         setErrors(newErrors);
@@ -134,35 +115,33 @@ const FormComponent = () => {
                     Asunto: formData.title,
                     Cuerpo: formData.description,
                     Fecha: dayjs().format('DD/MM/YYYY HH:mm:ss'),
-                    Fechav: dayjs(formData.date).format('DD/MM/YYYY HH:mm:ss'),
+                    Fechav: task.fechav,
                     Tag: formData.selectedTags.join(','),
-                    Tarea: formData.selectedType,
+                    Tarea: task.tarea,
                     Afecta: formData.selectedUsers.join(','),
-                    Alcance: formData.alcance ? formData.alcance : 'todos'
+                    Alcance: task.alcance ?? 'todos',
+                    Origen: task.orden ?? ""
                 });
-
-                triggerUpdate()
-
-                // Mostrar toast de éxito
-                toast({
-                    title: 'Tarea Creada',
-                    description: `La tarea se ha creado correctamente. Id: ${req.id}`,
-                    status: 'success',
-                    duration: 5000,
-                    isClosable: true,
-                })
-
-                navigate(`/agenda-comunicacion/${req.id}`);
+                if (req.Errorid === "00") {
+                    toast({
+                        title: 'Tarea se derivo correctamente',
+                        description: `Se derivo correctamente la tarea`,
+                        status: 'success',
+                        duration: 5000,
+                        isClosable: true,
+                    })
+                    window.location.reload()
+                } else {
+                    toast({
+                        title: 'La tarea no se derivo correctamente',
+                        description: `Hubo un error al tratar de derivar la tarea. ${req.Errornombre}`,
+                        status: 'success',
+                        duration: 5000,
+                        isClosable: true,
+                    })
+                }
             } catch (error) {
                 console.error('Error creating task:', error);
-                // Mostrar toast de error
-                toast({
-                    title: 'Tarea no creada',
-                    description: `Hubo un problema al crear la tarea. Por favor, inténtalo de nuevo. Id: ${error}`,
-                    status: 'error',
-                    duration: 5000,
-                    isClosable: true,
-                })
             }
         }
     };
@@ -181,20 +160,15 @@ const FormComponent = () => {
                             <Select
                                 name='selectedType'
                                 onChange={handleInputChange}
-                                defaultValue={''}
+                                defaultValue={task.taread}
+                                disabled
                             >
-                                <option value='' disabled>Seleccione el tipo</option>
-                                {types.map(type => (
-                                    <option key={type.codigo} value={type.codigo}>{type.codigod}</option>
-                                ))}
+                                <option value={task.taread} disabled>{task.taread ?? ""}</option>
+
                             </Select>
-                            {!errors.selectedType ? (
-                                <FormHelperText>
-                                    Seleccione el tipo de tarea que quiere crear.
-                                </FormHelperText>
-                            ) : (
-                                <FormErrorMessage>{errors.selectedType}</FormErrorMessage>
-                            )}
+                            <FormHelperText>
+                                {task.tarea === "3" ? (<span>Alcance de la tarea: {task.alcance.toUpperCase() ?? ""}</span>) : null}
+                            </FormHelperText>
                         </FormControl>
                     </GridItem>
                     <GridItem colSpan={1}>
@@ -235,17 +209,14 @@ const FormComponent = () => {
                         <FormControl isRequired isInvalid={errors.date}>
                             <FormLabel>Fecha</FormLabel>
                             <Input
-                                type='datetime-local'
+                                type='string'
                                 name='date'
-                                value={formData.date}
+                                value={task.fechav}
+                                disabled
                                 onChange={handleInputChange} />
-                            {!errors.date ? (
-                                <FormHelperText>
-                                    Introduce la fecha y hora de publicación de la tarea.
-                                </FormHelperText>
-                            ) : (
-                                <FormErrorMessage>{errors.date}</FormErrorMessage>
-                            )}
+                            <FormHelperText>
+                                Fecha y hora para publicar la tarea.
+                            </FormHelperText>
                         </FormControl>
                     </GridItem>
 
@@ -270,7 +241,7 @@ const FormComponent = () => {
                                     <Tag
                                         key={value}
                                         variant='solid'
-                                        colorScheme='blue'
+                                        colorScheme={colorScheme}
                                         mr={2}
                                         mt={2}
                                     >
@@ -281,29 +252,6 @@ const FormComponent = () => {
                             </div>
                         </FormControl>
                     </GridItem>
-
-
-
-                    {formData.selectedType === '3' && (
-                        <GridItem colSpan={1}>
-                            <FormControl isRequired isInvalid={errors.alcance}>
-                                <FormLabel>Alcance</FormLabel>
-                                <Input
-                                    type='text'
-                                    name='alcance'
-                                    value={formData.alcance}
-                                    onChange={handleInputChange} />
-                                {!errors.alcance ? (
-                                    <FormHelperText>
-                                        Introduce el alcance de la tarea.
-                                    </FormHelperText>
-                                ) : (
-                                    <FormErrorMessage>{errors.alcance}</FormErrorMessage>
-                                )}
-                            </FormControl>
-                        </GridItem>
-                    )}
-
                     <GridItem colSpan={1}>
                         <FormControl isRequired isInvalid={errors.selectedUsers}>
                             <FormLabel>Usuarios afectados</FormLabel>
@@ -325,7 +273,7 @@ const FormComponent = () => {
                                     <Tag
                                         key={value}
                                         variant='solid'
-                                        colorScheme='blue'
+                                        colorScheme={colorScheme}
                                         mr={2}
                                         mt={2}
                                     >
@@ -339,7 +287,7 @@ const FormComponent = () => {
                 </Grid>
                 <Button
                     mt={4}
-                    colorScheme='blue'
+                    colorScheme={colorScheme}
                     onClick={handleSubmit}
                 >
                     Crear Tarea
@@ -349,4 +297,4 @@ const FormComponent = () => {
     );
 };
 
-export default FormComponent;
+export default FormDeriveComponent;

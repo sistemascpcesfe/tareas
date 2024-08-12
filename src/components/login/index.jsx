@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from 'react-hot-toast';
 import { checkLoginService, loginRequest } from "../../service/sesion";
 import LayoutLogin from "../layout/login";
-import { Button, Input, InputGroup, InputRightElement } from "@chakra-ui/react";
+import { Button, Input, InputGroup, InputRightElement, useToast } from "@chakra-ui/react";
 
 export default function Login() {
   const navigate = useNavigate();
+  const toast = useToast()
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false)
@@ -22,10 +22,20 @@ export default function Login() {
         localStorage.setItem("number", res.Numero || "");
         localStorage.setItem("img", res.Foto || "");
         localStorage.setItem("status", res.Estado || "");
-        toast.success(`Inicio de sesión correcto`, { position: 'bottom-right' })
+        toast({
+          title: "Inicio de sesión correcto",
+          description: `Bienvenid@ ${res.Usuario}`,
+          status: "success",
+          isClosable: true,
+        });
         navigate("/agenda-comunicacion");
       } else {
-        toast.error(`${res.Errornombre}`, { position: 'bottom-right' })
+        toast({
+          title: "Error al iniciar sesión",
+          description: `Error: ${res.Errornombre}`,
+          status: "error",
+          isClosable: true,
+        });
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
@@ -39,36 +49,37 @@ export default function Login() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await checkLoginService();
-        if (res.Errorid !== "0") {
-          //   toast({
-          //     duration: 5000,
-          //     title: `Sesión caducada`,
-          //     description: `Inicie sesión nuevamente`,
-          //   });
-        } else {
-          //   toast({
-          //     duration: 5000,
-          //     title: `Inicio de sesión correcto`,
-          //     description: `Bienvenid@ de nuevo!`,
-          //   });
-          navigate("/agenda-comunicacion");
-        }
-      } catch (error) {
-        console.error(error);
+  const fetchData = async () => {
+    try {
+      const res = await checkLoginService();
+      if (res.Errorid !== "0") {
+        toast({
+          title: "Sin sesión previa",
+          description: `Error: ${res.Errornombre}`,
+          status: "error",
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Ya inicio sesión anteriormente",
+          description: `Bienvenid@ ${localStorage.getItem("user")}`,
+          status: "success",
+          isClosable: true,
+        });
+        navigate("/agenda-comunicacion");
       }
-    };
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
   return (
     <LayoutLogin>
       <main className="my-20 w-full">
-        <Toaster />
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
             Ingrese sus datos
@@ -83,7 +94,7 @@ export default function Login() {
               >
                 Usuario
               </label>
-               <InputGroup size='md'>
+              <InputGroup size='md'>
                 <Input
                   type="text"
                   value={username}
@@ -91,7 +102,7 @@ export default function Login() {
                   placeholder="Usuario"
                   required
                 />
-               </InputGroup>
+              </InputGroup>
             </div>
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
               <label
@@ -101,28 +112,28 @@ export default function Login() {
                 Contraseña
               </label>
               <InputGroup size='md'>
-              <Input
-                pr='4.5rem'
-                type={show ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Contraseña"
-                required
-              />
-              <InputRightElement width='4.5rem'>
-                <Button h='1.75rem' size='sm' onClick={handleClick}>
-                  {show ? 'Esconder' : 'Ver'}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
+                <Input
+                  pr='4.5rem'
+                  type={show ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Contraseña"
+                  required
+                />
+                <InputRightElement width='4.5rem'>
+                  <Button h='1.75rem' size='sm' onClick={handleClick}>
+                    {show ? 'Esconder' : 'Ver'}
+                  </Button>
+                </InputRightElement>
+              </InputGroup>
 
               <div>
-                <button
+                {/* <button
                   onClick={() => navigate("/reset")}
                   className="w-full pt-4 text-sm font-semibold"
                 >
                   ¿olvidó su contraseña?
-                </button>
+                </button> */}
               </div>
             </div>
             <div>

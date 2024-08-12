@@ -18,17 +18,21 @@ import {
     Tag,
     TagLabel,
     TagCloseButton,
-    Input
+    Input,
+    useToast
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { createTaskService, tagService, usersService } from '../../service/tarea';
 import dayjs from 'dayjs';
-import toast from 'react-hot-toast';
 import { useTask } from '../../provider/taskProvider';
 import { getColorForTags } from '../../utils';
+import { CiEdit } from 'react-icons/ci';
+import { useLoadingStatus } from '../../provider/loadingStatusProvider';
 
-const EditButton = ({ task }) => {
+const EditButton = ({ task, size }) => {
+    const toast = useToast()
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { setIsStatus } = useLoadingStatus()
     const { triggerUpdate } = useTask()
     const [tags, setTags] = useState([]);
     const [users, setUsers] = useState([]);
@@ -45,7 +49,7 @@ const EditButton = ({ task }) => {
     });
 
     useEffect(() => {
-        if(task){
+        if (task) {
             getDataService();
             initializeFormData();
         }
@@ -125,10 +129,6 @@ const EditButton = ({ task }) => {
     const validate = () => {
         const newErrors = {};
 
-        if (!formData.date) {
-            newErrors.date = 'La fecha y hora son requeridos.';
-        }
-
         if (!formData.title) {
             newErrors.title = 'El asunto es requerido.';
         } else if (formData.title.length < 10) {
@@ -166,7 +166,7 @@ const EditButton = ({ task }) => {
                     Asunto: formData.title,
                     Cuerpo: formData.description,
                     Fecha: dayjs().format('DD/MM/YYYY HH:mm:ss'),
-                    Fechav: dayjs(formData.date).format('DD/MM/YYYY HH:mm:ss'),
+                    Fechav: task.fechav,
                     Tag: formData.selectedTags.join(','),
                     Afecta: formData.selectedUsers.join(','),
                     Alcance: formData.alcance ? formData.alcance : 'todos',
@@ -174,20 +174,32 @@ const EditButton = ({ task }) => {
                     Tarea: task.tarea,
                     Taread: task.taread
                 });
-                console.log("ACA", req)
-                toast.success('La tarea se ha creado correctamente.');
+                toast({
+                    title: 'Tarea Creada',
+                    description: `La tarea se ha creado correctamente. Id: ${req.id}`,
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                })
+                setIsStatus(true)
                 triggerUpdate()
                 onClose();
             } catch (error) {
                 console.error('Error creating task:', error);
-                toast.error('Hubo un problema al crear la tarea. Por favor, inténtalo de nuevo.');
+                toast({
+                    title: 'Tarea no creada',
+                    description: `Hubo un problema al crear la tarea. Por favor, inténtalo de nuevo. ${error}`,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                })
             }
         }
     };
 
     return (
         <>
-            <Button colorScheme={getColorForTags(task?.tarea)} onClick={onOpen}>Editar</Button>
+            <Button variant="ghost" onClick={onOpen}><CiEdit size={size} /></Button>
             <Modal isOpen={isOpen} onClose={onClose} size='6xl'>
                 <ModalOverlay />
                 <ModalContent>
@@ -254,25 +266,6 @@ const EditButton = ({ task }) => {
                                 </GridItem>
 
                                 <GridItem colSpan={1}>
-                                    <FormControl isRequired isInvalid={errors.date}>
-                                        <FormLabel>Fecha</FormLabel>
-                                        <Input
-                                            type='datetime-local'
-                                            name='date'
-                                            value={formData.date}
-                                            onChange={handleInputChange}
-                                        />
-                                        {!errors.date ? (
-                                            <FormHelperText>
-                                                Introduce la fecha y hora de publicación de la tarea.
-                                            </FormHelperText>
-                                        ) : (
-                                            <FormErrorMessage>{errors.date}</FormErrorMessage>
-                                        )}
-                                    </FormControl>
-                                </GridItem>
-
-                                <GridItem colSpan={1}>
                                     <FormControl isRequired isInvalid={errors.selectedTags}>
                                         <FormLabel>Tags</FormLabel>
                                         <Select
@@ -292,7 +285,6 @@ const EditButton = ({ task }) => {
                                             {formData.selectedTags.map(tag => (
                                                 <Tag
                                                     key={tag}
-                                                    borderRadius='full'
                                                     variant='solid'
                                                     colorScheme={getColorForTags(task?.tarea)}
                                                     mr={2}
@@ -349,7 +341,6 @@ const EditButton = ({ task }) => {
                                             {formData.selectedUsers.map(user => (
                                                 <Tag
                                                     key={user}
-                                                    borderRadius='full'
                                                     variant='solid'
                                                     colorScheme={getColorForTags(task?.tarea)}
                                                     mr={2}

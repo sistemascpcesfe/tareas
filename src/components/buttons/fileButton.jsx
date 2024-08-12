@@ -1,28 +1,30 @@
-import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, useDisclosure } from '@chakra-ui/react';
-import FileComponent from '../home/fileComponent';
+import { Button, Popover, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, useDisclosure } from '@chakra-ui/react';
+import FileComponent from '../home/Card/fileComponent';
 import { useEffect, useState } from 'react';
+import { MdAttachFile } from 'react-icons/md';
 
-const FileButton = ({ colorScheme, asunto, id }) => {
+const FileButton = ({ colorScheme, asunto, id, size }) => {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [dataFile , setDataFile] = useState()
+    const [dataFile, setDataFile] = useState()
 
     useEffect(() => {
-        setDataFile({id: id, asunto: asunto})
-    },[])
+        setDataFile({ id: id, asunto: asunto })
+    }, [])
 
     return (
         <>
-            <Button colorScheme={colorScheme} onClick={onOpen}>Agregar archivos</Button>
-            <Modal isOpen={isOpen} onClose={onClose} size='xl'>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Formulario para agregar archivos</ModalHeader>
-                    <ModalCloseButton />
-                        <ModalBody>
-                            <FileComponent colorScheme={colorScheme} dataFile={dataFile}/>
-                        </ModalBody>
-                </ModalContent>
-            </Modal>
+            <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement='left'>
+                <PopoverTrigger>
+                    <Button variant="ghost" onClick={onOpen}><MdAttachFile size={size} /></Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                    <PopoverHeader>Formulario para agregar archivos</PopoverHeader>
+                    <PopoverCloseButton />
+                    <PopoverBody>
+                        <FileComponent colorScheme={colorScheme} dataFile={dataFile} />
+                    </PopoverBody>
+                </PopoverContent>
+            </Popover>
         </>
     );
 };

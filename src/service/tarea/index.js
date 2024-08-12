@@ -2,7 +2,7 @@ import axios from "axios";
 
 const SOAP_SERVER_URL = 'http://181.104.2.233/software';
 
-export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, estado, asunto, orden) => {
+export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, estado, asunto, orden, origen) => {
   try {
     const soapRequest = `
       <soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
@@ -23,6 +23,7 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
             <Asunto xsi:type="xsd:string">${asunto ? asunto : ""}</Asunto>
             <Afecta xsi:type="xsd:string">${afecta ? afecta : ""}</Afecta>
             <Orden xsi:type="xsd:string">${orden ? orden : ""}</Orden>
+            <Origen xsi:type="xsd:string">${origen ? origen : ""}</Origen>
             <Estado xsi:type="xsd:string">${estado ? estado : ""}</Estado>
           </urn:nube_consultareas>
         </soapenv:Body>
@@ -31,7 +32,6 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
-    
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
 
@@ -56,7 +56,8 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
       const estado = item.querySelector('Estado')?.textContent;
       const estadod = item.querySelector('Estadod')?.textContent;
       const estadof = item.querySelector('Estadof')?.textContent;
-      return { origen, orden, tarea, taread, asunto, alcance, tag, fecha, fechav, usuario, cuerpo, afecta, estado, fechai, estadod, estadof };
+      const afectado = item.querySelector('Afectado')?.textContent;
+      return { origen, orden, tarea, taread, asunto, alcance, tag, fecha, fechav, usuario, cuerpo, afecta, estado, fechai, estadod, estadof, afectado };
     });
 
     const jsonData = {
@@ -73,7 +74,6 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
 };
 
 export const checkSoapForEditTaskService = async (orden) => {
-
   try {
     const soapRequest = `
       <soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
@@ -101,14 +101,14 @@ export const checkSoapForEditTaskService = async (orden) => {
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
-    
+
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
 
     const errorid = erroridNode ? erroridNode.textContent : "";
     const errornombre = errornombreNode ? errornombreNode.textContent : "";
 
-    
+
 
     const jsonData = {
       Errorid: errorid,
@@ -124,35 +124,28 @@ export const checkSoapForEditTaskService = async (orden) => {
 };
 
 
-export const getTaskForDayService = async (date) => {
+export const getTaskForOrder = async(orden) => {
+
   try {
-    const soapRequest =
-      `<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
+    const soapRequest = `
+      <soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
         <soapenv:Header/>
         <soapenv:Body>
-          <urn:nube_consultareas soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-            <Credencial xsi:type="urn:Tcredencial" xmlns:urn="urn:cpcesfeIntf">
-              <Usuario xsi:type="xsd:string">${localStorage.getItem("user") ? localStorage.getItem("user") : ""}</Usuario>
-              <Sesion xsi:type="xsd:string">${localStorage.getItem("sesion") ? localStorage.getItem("sesion") : ""}</Sesion>
-              <Origen xsi:type="xsd:string">WEB</Origen>
-            </Credencial>
-            <Fechad xsi:type="xsd:string"></Fechad>
-            <Fechah xsi:type="xsd:string"></Fechah>
-            <Vfechad xsi:type="xsd:string">${date ? date : ""}</Vfechad>
-            <Vfechah xsi:type="xsd:string">${date ? date : ""}</Vfechah>
-            <Tags xsi:type="xsd:string"></Tags>
-            <Tarea xsi:type="xsd:string"></Tarea>
-            <Asunto xsi:type="xsd:string"></Asunto>
-            <Afecta xsi:type="xsd:string"></Afecta>
-            <Orden xsi:type="xsd:string"></Orden>
-          </urn:nube_consultareas>
+            <urn:nube_consultareasf soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+              <Credencial xsi:type="urn:Tcredencial" xmlns:urn="urn:cpcesfeIntf">
+                  <Usuario xsi:type="xsd:string">${localStorage.getItem("user") ? localStorage.getItem("user") : ""}</Usuario>
+                  <Sesion xsi:type="xsd:string">${localStorage.getItem("sesion") ? localStorage.getItem("sesion") : ""}</Sesion>
+                  <Origen xsi:type="xsd:string">web</Origen>
+              </Credencial>
+              <Orden xsi:type="xsd:string">${orden ?? ""}</Orden>
+            </urn:nube_consultareasf>
         </soapenv:Body>
       </soapenv:Envelope>`;
 
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
-    
+
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
 
@@ -177,7 +170,8 @@ export const getTaskForDayService = async (date) => {
       const estado = item.querySelector('Estado')?.textContent;
       const estadod = item.querySelector('Estadod')?.textContent;
       const estadof = item.querySelector('Estadof')?.textContent;
-      return { origen, orden, tarea, taread, asunto, alcance, tag, fecha, fechav, usuario, cuerpo, afecta, estado, fechai, estadod, estadof };
+      const afectado = item.querySelector('Afectado')?.textContent;
+      return { origen, orden, tarea, taread, asunto, alcance, tag, fecha, fechav, usuario, cuerpo, afecta, estado, fechai, estadod, estadof, afectado };
     });
 
     const jsonData = {
@@ -414,7 +408,6 @@ export const stateTaskService = async (orden, estado) => {
            </urn:nube_estadotareas>
         </soapenv:Body>
      </soapenv:Envelope>`;
-     console.log(soapRequest)
 
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
 
@@ -465,7 +458,6 @@ export const uploadFileService = async (options) => {
     </soapenv:Body>
     </soapenv:Envelope>`;
   try {
-
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
@@ -511,9 +503,7 @@ export const getFileService = async (options) => {
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, "text/xml");
-
-    console.log(xmlDoc)
-
+    
     const erroridNode = xmlDoc.querySelector("Errorid");
     const errornombreNode = xmlDoc.querySelector("Errornombre");
 
@@ -554,6 +544,7 @@ export const usersService = async () => {
                         <Sesion xsi:type="xsd:string">${localStorage.getItem("sesion") || ""}</Sesion>
                         <Origen xsi:type="xsd:string">WEB</Origen>
                     </Credencial>
+                    <Origen xsi:type="xsc:string">T</Origen>
                     <Busca xsi:type="xsd:string"></Busca>
                 </urn:base_usuarios>
                 </soapenv:Body>

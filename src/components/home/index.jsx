@@ -1,28 +1,28 @@
-import Header from "./header.jsx";
-import Calendar from "./calendar.jsx";
+import Header from "./Calendar/header.jsx";
+import Calendar from "./Calendar/calendar.jsx";
 import { checkLoginService } from "../../service/sesion/index.js";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import toast,{ Toaster } from "react-hot-toast";
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import dayjs from "dayjs";
+dayjs.extend(customParseFormat);
 
 const Home = () => {
     const navigate = useNavigate()
 
     const getSesion = async () => {
         const req = await checkLoginService()
-        if(req.Errorid === '92'){
-            toast.error(`${req.Errornombre}`, {position: "bottom-right"})
+        if (req.Errorid === '92') {
             navigate("/")
         }
     }
 
-     useEffect(() => {
-         getSesion()
-     }, []);
+    useEffect(() => {
+        getSesion()
+    }, []);
 
     return (
         <div className="h-full w-full overflow-x-hidden">
-            <Toaster/>
             <div>
                 <Header />
             </div>

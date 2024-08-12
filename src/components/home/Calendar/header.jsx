@@ -1,7 +1,7 @@
-import LogoutButton from "../buttons/LogoutButton";
+import LogoutButton from "../../buttons/LogoutButton";
 import FiltersComponent from "./filters";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { useDate } from "../../provider/dateProvider";
+import { useDate } from "../../../provider/dateProvider";
 import {
     Button,
     Popover,
@@ -12,7 +12,7 @@ import {
     PopoverHeader,
     PopoverTrigger
 } from '@chakra-ui/react';
-import CreateTask from "../buttons/CreateTask";
+import CreateTask from "../../buttons/CreateTask";
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useState } from "react";

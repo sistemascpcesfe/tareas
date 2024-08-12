@@ -6,23 +6,27 @@ import {
     ModalBody,
     ModalCloseButton,
     Button,
-    useDisclosure
+    useDisclosure,
+    Tooltip
 } from '@chakra-ui/react'
 import FormComponent from '../home/form';
+import { BsPlus } from 'react-icons/bs';
 
 const CreateTask = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
 
     return (
         <>
-            <Button onClick={onOpen}>Crear tarea</Button>
+            <Tooltip hasArrow placement='bottom' label="Crear tarea">
+                <Button onClick={onOpen} variant='outline'><BsPlus size={24} /></Button>
+            </Tooltip>
             <Modal isOpen={isOpen} onClose={onClose} size='6xl'>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Formulario para la nueva tarea</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <FormComponent/>
+                        <FormComponent />
                     </ModalBody>
                 </ModalContent>
             </Modal>

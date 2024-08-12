@@ -1,21 +1,31 @@
 import { useEffect, useRef, useState } from "react";
-import { useDate } from "../../provider/dateProvider";
-import { createTaskService } from "../../service/tarea"; // Asumiendo que tienes un servicio para actualizar tareas
-import toast, { Toaster } from "react-hot-toast";
+import { useDate } from "../../../provider/dateProvider";
+import { createTaskService } from "../../../service/tarea";
 import TaskCard from "./taskCard";
 import dayjs from "dayjs";
-import { useTask } from "../../provider/taskProvider";
+import { useTask } from "../../../provider/taskProvider";
+import { useToast } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 
 const Calendar = () => {
     const { currentDate, today } = useDate();
+    const navigate = useNavigate()
+    const toast = useToast()
     const { task, setFilters, triggerUpdate } = useTask();
     const [dropIndicator, setDropIndicator] = useState(null);
+    const [dataUser, setDataUser] = useState({})
     const parentRef = useRef();
 
     useEffect(() => {
+        const user = localStorage.getItem("user")
+        const sesion = localStorage.getItem("sesion")
+        if (!user || !sesion) {
+            navigate("/")
+        }
+        setDataUser({ user, sesion });
         const startOfMonth = currentDate.startOf("month").format("DD/MM/YYYY");
         const endOfMonth = currentDate.endOf("month").format("DD/MM/YYYY");
-        setFilters({dateStart: startOfMonth, dateEnd: endOfMonth, status:"0"});
+        setFilters({ dateStart: startOfMonth, dateEnd: endOfMonth });
     }, [currentDate]);
 
     const startOfMonthDate = currentDate.startOf("month");
@@ -66,14 +76,25 @@ const Calendar = () => {
                 Afecta: updatedTask.afecta
             });
             if (res.Errorid === "00") {
-                toast.success("Tarea actualizada correctamente", { position: "bottom-right" });
+                toast({
+                    title: 'Tarea actualizada correctamente',
+                    description: `Se actualizo correctamente la tarea con id: ${res.id}`,
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                })
             } else {
-                toast.error(`${res.Errornombre}`, { position: "bottom-right" });
+                toast({
+                    title: 'No se actualizo la tarea',
+                    description: `Hubo un error tratando de actualizar la tarea. ${res.Errornombre}`,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                })
             }
             triggerUpdate()
         } catch (error) {
             console.error("Error actualizando la tarea:", error);
-            toast.error(`${error}`, { position: "bottom-right" });
         } finally {
             setDropIndicator(null);
         }
@@ -115,7 +136,7 @@ const Calendar = () => {
                                 onDragStart={(event) => handleDragStart(event, task)}
                                 className="cursor-move"
                             >
-                                <TaskCard task={task} today={today} />
+                                <TaskCard task={task} today={today} user={dataUser} />
                             </div>
                         ))}
                         {dropIndicator === date ? (<div className="w-full h-1 bg-blue-200 rounded-full block"></div>) : null}
@@ -143,8 +164,6 @@ const Calendar = () => {
 
     const filterAndSortTasks = (tasks, date) => {
         const filteredTasks = tasks.filter((task) => {
-            if (!task.fechav) return false; // Verificar si fechav es undefined o null
-
             const [fechaParte, hora] = task.fechav.split(" ");
             const [dia, mes, anio] = fechaParte.split("/");
             const fechaFormateada = `${anio}-${mes}-${dia}`;
@@ -153,7 +172,7 @@ const Calendar = () => {
         });
 
         filteredTasks.sort((a, b) => {
-            if (!a.fechav || !b.fechav) return 0; // Manejar casos donde fechav es undefined o null
+            if (!a.fechav || !b.fechav) return 0;
 
             const timeA = dayjs(a.fechav, "DD/MM/YYYY HH:mm:ss").format(
                 "HH:mm:ss"
@@ -171,7 +190,6 @@ const Calendar = () => {
 
     return (
         <div className="bg-white rounded-lg shadow-md">
-            <Toaster />
             <div className="grid grid-cols-7 divide-x divide-y border-gray-200" ref={parentRef}>
                 {generateCalendarCells()}
             </div>

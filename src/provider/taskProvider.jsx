@@ -8,7 +8,6 @@ dayjs.locale('es'); // Establecer locale en español
 const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
-    const defaultStatus = "0"; // Estado por defecto
     const [task, setTask] = useState([]);
     const [filters, setFilters] = useState({
         dateStart: "",
@@ -16,7 +15,7 @@ export const TaskProvider = ({ children }) => {
         tags: "",
         types: "",
         users: "",
-        status: defaultStatus // Asigna el estado por defecto
+        status: "" // Asigna el estado por defecto
     });
     const [filterOptions, setFilterOptions] = useState({ tags: [], users: [], types: [], status: [] });
 
@@ -42,7 +41,8 @@ export const TaskProvider = ({ children }) => {
                 filters.users,
                 filters.status,
                 "",
-                ""
+                "",
+                "0"
             );
             setTask(req.items);
         } catch (error) {
@@ -51,7 +51,7 @@ export const TaskProvider = ({ children }) => {
     }, []);
 
     const triggerUpdate = () => {
-        getTask(filters); // Actualiza las tareas basadas en los filtros actuales
+        getTask(filters);
     }
 
     useEffect(() => {
