@@ -164,12 +164,35 @@ const Calendar = () => {
 
     const filterAndSortTasks = (tasks, date) => {
         const filteredTasks = tasks.filter((task) => {
+            // Verifica si task.fechav existe y no está vacío
+            if (!task.fechav || typeof task.fechav !== 'string' || !task.fechav.includes(' ')) {
+                return false; // Excluye tareas que no cumplen con el formato esperado
+            }
+
+            // Divide la cadena en fecha y hora
             const [fechaParte, hora] = task.fechav.split(" ");
+
+            // Verifica si fechaParte y hora tienen valores válidos
+            if (!fechaParte || !hora || !fechaParte.includes('/')) {
+                return false; // Excluye tareas con formato incorrecto
+            }
+
+            // Divide la fecha en día, mes y año
             const [dia, mes, anio] = fechaParte.split("/");
+
+            // Verifica si dia, mes y anio tienen valores válidos
+            if (!dia || !mes || !anio) {
+                return false; // Excluye tareas con formato de fecha incorrecto
+            }
+
+            // Formatea la fecha y hora
             const fechaFormateada = `${anio}-${mes}-${dia}`;
             const fechaHora = `${fechaFormateada} ${hora}`;
+
+            // Verifica si la fechaHora es válida
             return dayjs(fechaHora).format("YYYY-MM-DD") === date;
         });
+
 
         filteredTasks.sort((a, b) => {
             if (!a.fechav || !b.fechav) return 0;

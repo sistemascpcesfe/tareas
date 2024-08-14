@@ -1,5 +1,10 @@
 import dayjs from 'dayjs';
 
+//Desarrollo: 'http://localhost:8080/tarea'
+//Producción: 'http://181.104.2.233/software'
+
+export const SOAP_SERVER_URL = 'http://localhost:8080/tarea';
+
 export const capitalizeFirstLetter = (str) => {
   if (typeof str === 'string') {
     return str.charAt(0).toUpperCase() + str.slice(1);

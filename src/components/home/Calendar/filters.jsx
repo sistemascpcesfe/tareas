@@ -27,8 +27,45 @@ const FiltersComponent = () => {
 
     return (
         <div className='flex flex-col gap-2'>
-            <div className="grid grid-cols-4 gap-4">
-
+            <div className="grid grid-cols-5 gap-4">
+                {/* Tipos de tarea */}
+                <div className="flex flex-col">
+                    <Popover>
+                        <PopoverTrigger>
+                            <Button size="sm" width="100%">Tipos</Button>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                            <PopoverArrow />
+                            <PopoverCloseButton />
+                            <PopoverHeader>Tipos</PopoverHeader>
+                            <PopoverBody size='lg'>
+                                <RadioGroup
+                                    value={filters.types}
+                                    onChange={(values) => handleFilterChange(values, "types")}
+                                >
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {filterOptions.types.map((e) => (
+                                            <Radio
+                                                key={e.codigo}
+                                                value={e.codigo}
+                                                className="whitespace-nowrap overflow-hidden overflow-ellipsis"
+                                            >
+                                                {e.codigod && capitalizeFirstLetter(e.codigod.toLowerCase())}
+                                            </Radio>
+                                        ))}
+                                        <Radio
+                                            key="todos"
+                                            value=""
+                                            className="whitespace-nowrap overflow-hidden overflow-ellipsis"
+                                        >
+                                            Todos
+                                        </Radio>
+                                    </div>
+                                </RadioGroup>
+                            </PopoverBody>
+                        </PopoverContent>
+                    </Popover>
+                </div>
                 {/* Etiquetas */}
                 <div className="flex flex-col">
                     <Popover>
@@ -91,44 +128,6 @@ const FiltersComponent = () => {
                         </PopoverContent>
                     </Popover>
                 </div>
-                {/* Tipos de tarea */}
-                <div className="flex flex-col">
-                    <Popover>
-                        <PopoverTrigger>
-                            <Button size="sm" width="100%">Tipos</Button>
-                        </PopoverTrigger>
-                        <PopoverContent>
-                            <PopoverArrow />
-                            <PopoverCloseButton />
-                            <PopoverHeader>Tipos</PopoverHeader>
-                            <PopoverBody size='lg'>
-                                <RadioGroup
-                                    value={filters.types}
-                                    onChange={(values) => handleFilterChange(values, "types")}
-                                >
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {filterOptions.types.map((e) => (
-                                            <Radio
-                                                key={e.codigo}
-                                                value={e.codigo}
-                                                className="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                                            >
-                                                {e.codigod && capitalizeFirstLetter(e.codigod.toLowerCase())}
-                                            </Radio>
-                                        ))}
-                                        <Radio
-                                            key="todos"
-                                            value=""
-                                            className="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                                        >
-                                            Todos
-                                        </Radio>
-                                    </div>
-                                </RadioGroup>
-                            </PopoverBody>
-                        </PopoverContent>
-                    </Popover>
-                </div>
                 {/* Estados */}
                 <div className="flex flex-col">
                     <Popover>
@@ -167,6 +166,28 @@ const FiltersComponent = () => {
                         </PopoverContent>
                     </Popover>
                 </div>
+                {/* <div className="flex flex-col">
+                    <RadioGroup
+                        defaultValue='global'
+                    >
+                        <div className="flex flex-col">
+                            <Radio
+                                key="personal"
+                                value="personal"
+                                className="whitespace-nowrap overflow-hidden overflow-ellipsis"
+                            >
+                                Personal
+                            </Radio>
+                            <Radio
+                                key="global"
+                                value="global"
+                                className="whitespace-nowrap overflow-hidden overflow-ellipsis"
+                            >
+                                Global
+                            </Radio>
+                        </div>
+                    </RadioGroup >
+                </div> */}
             </div>
         </div>
     );

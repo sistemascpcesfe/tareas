@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const SOAP_SERVER_URL = 'http://181.104.2.233/software';
+import { SOAP_SERVER_URL } from "../../utils";
 
 export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, estado, asunto, orden, origen) => {
   try {

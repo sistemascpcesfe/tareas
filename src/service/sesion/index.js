@@ -1,8 +1,6 @@
-
 import axios from "axios";
 import { MD5 } from "crypto-js";
-
-const SOAP_SERVER_URL = 'http://181.104.2.233/software';
+import { SOAP_SERVER_URL } from "../../utils";
 
 export const loginRequest = async (user, password) => {
   const hashedPassword = MD5(password).toString();
