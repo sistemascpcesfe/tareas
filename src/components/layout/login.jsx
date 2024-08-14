@@ -1,12 +1,13 @@
 import CssImage from "../../assets/CSS-Home.png";
 import DSSImage from "../../assets/DSS-Home.png";
 import LogoImage from "../../assets/logocol.jpg";
+import { version } from "../../utils";
 
 export default function LayoutLogin(props) {
     return (
         <div>
             <div className="bg-white pt-4 h-screen flex flex-col">
-                <span className="absolute ml-2">V.1.0</span>
+                <span className="absolute ml-2">{version}</span>
                 <section>
                     <header className="flex justify-evenly items-center flex-wrap">
                         <div>
