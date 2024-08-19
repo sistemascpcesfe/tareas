@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 //Desarrollo: 'http://localhost:8080/software'
 //Producción: 'http://181.104.2.233/software'
 
-export const SOAP_SERVER_URL = 'http://localhost:8080/software';
+export const SOAP_SERVER_URL = 'http://181.104.2.233/software';
 export const version = "1.1"
 
 export const capitalizeFirstLetter = (str) => {
