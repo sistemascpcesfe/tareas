@@ -56,7 +56,7 @@ export const TaskProvider = ({ children }) => {
 
     useEffect(() => {
         getFilters();
-    }, [getFilters]);
+    }, []);
 
     useEffect(() => {
         getTask(filters);
