@@ -66,9 +66,8 @@ const FiltersComponent = () => {
                         </PopoverContent>
                     </Popover>
                 </div>
-                {/* Etiquetas */}
-                <div className="flex flex-col">
-                    <Popover>
+                <div className="flex flex-col" >
+                    <Popover >
                         <PopoverTrigger>
                             <Button size="sm" width="100%">Etiquetas</Button>
                         </PopoverTrigger>
@@ -82,9 +81,9 @@ const FiltersComponent = () => {
                                     onChange={(values) => handleFilterChange(values, "tags")}
                                 >
                                     <div className="grid grid-cols-2 gap-2">
-                                        {filterOptions.tags.map((e) => (
+                                        {filterOptions.tags.map((e, index) => (
                                             <Checkbox
-                                                key={e}
+                                                key={e + index} // Asegura que cada key sea único
                                                 value={e}
                                                 className="whitespace-nowrap overflow-hidden overflow-ellipsis"
                                             >
@@ -97,6 +96,7 @@ const FiltersComponent = () => {
                         </PopoverContent>
                     </Popover>
                 </div>
+
                 {/* Usuarios */}
                 <div className="flex flex-col">
                     <Popover>
