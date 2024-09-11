@@ -1,10 +1,10 @@
 import dayjs from 'dayjs';
 
-//Desarrollo: 'http://localhost:8080/software'
+//Desarrollo: 'http://localhost:8080/tarea'
 //Producción: 'http://181.104.2.233/software'
 
 export const SOAP_SERVER_URL = 'http://181.104.2.233/software';
-export const version = "1.1"
+export const version = "1.2"
 
 export const capitalizeFirstLetter = (str) => {
   if (typeof str === 'string') {
@@ -15,19 +15,19 @@ export const capitalizeFirstLetter = (str) => {
 };
 
 const taskColors = {
-    "1": "yellow",
-    "2": "blue",
-    "3": "red",
-    "4": "purple",
-    "5": "pink",
+  "1": "yellow",
+  "2": "blue",
+  "3": "red",
+  "4": "purple",
+  "5": "pink",
 };
 
 const tagsColors = {
-    "1": "yellow",
-    "2": "blue",
-    "3": "red",
-    "4": "purple",
-    "5": "pink",
+  "1": "yellow",
+  "2": "blue",
+  "3": "red",
+  "4": "purple",
+  "5": "pink",
 };
 
 // Verde, azul y naranja no los usemos
@@ -39,11 +39,11 @@ const tagsColors = {
 // Rosado - Web
 
 export const getColorForTaskType = (typeId) => {
-    return taskColors[typeId] || "teal";
+  return taskColors[typeId] || "teal";
 };
 
 export const getColorForTags = (typeId) => {
-    return tagsColors[typeId] || "teal";
+  return tagsColors[typeId] || "teal";
 };
 
 export const downloadFile = (cuerpo, nombreArchivoConExtension) => {
@@ -75,38 +75,38 @@ export const downloadFile = (cuerpo, nombreArchivoConExtension) => {
 };
 
 export const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses empiezan desde 0 en JavaScript
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses empiezan desde 0 en JavaScript
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
 
-    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 };
 
 // Función para agrupar tareas por fecha
 export const groupTasksByDate = (tasks) => {
-    const groupedTasks = {};
+  const groupedTasks = {};
 
-    tasks.forEach((task) => {
-        const fechaParte = task.fechav.split(' ')[0]; // Extrae la fecha de la tarea
-        // Convierte la fecha al formato 'YYYY-MM-DD'
-        const formattedDate = dayjs(fechaParte, 'DD/MM/YYYY').format('YYYY-MM-DD');
+  tasks.forEach((task) => {
+    const fechaParte = task.fechav.split(' ')[0]; // Extrae la fecha de la tarea
+    // Convierte la fecha al formato 'YYYY-MM-DD'
+    const formattedDate = dayjs(fechaParte, 'DD/MM/YYYY').format('YYYY-MM-DD');
 
-        if (!groupedTasks[formattedDate]) {
-            groupedTasks[formattedDate] = [];
-        }
+    if (!groupedTasks[formattedDate]) {
+      groupedTasks[formattedDate] = [];
+    }
 
-        groupedTasks[formattedDate].push(task.asunto);
-    });
+    groupedTasks[formattedDate].push(task.asunto);
+  });
 
-    // Ordenar las fechas
-    const sortedGroupedTasks = Object.keys(groupedTasks).sort().reduce((obj, key) => {
-        obj[key] = groupedTasks[key];
-        return obj;
-    }, {});
+  // Ordenar las fechas
+  const sortedGroupedTasks = Object.keys(groupedTasks).sort().reduce((obj, key) => {
+    obj[key] = groupedTasks[key];
+    return obj;
+  }, {});
 
-    return sortedGroupedTasks;
+  return sortedGroupedTasks;
 };

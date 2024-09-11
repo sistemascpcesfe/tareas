@@ -28,6 +28,14 @@ const RepeatButton = ({ colorScheme, task, files, isLoadingFiles, size }) => {
     };
 
     const handleConfirm = async () => {
+        if (datesTimes.length === 0) {
+            toast({
+                title: "Debe agregar al menos una fecha",
+                status: "error",
+                isClosable: true,
+            });
+            return
+        }
         toast({
             title: "Creando tarea...",
             status: "info",

@@ -3,37 +3,57 @@ import { SOAP_SERVER_URL } from "../../utils";
 
 export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, estado, asunto, orden, origen) => {
   try {
+
     const soapRequest = `
       <soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
         <soapenv:Header/>
         <soapenv:Body>
           <urn:nube_consultareas soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
             <Credencial xsi:type="urn:Tcredencial" xmlns:urn="urn:cpcesfeIntf">
-              <Usuario xsi:type="xsd:string">${localStorage.getItem("user") ? localStorage.getItem("user") : ""}</Usuario>
-              <Sesion xsi:type="xsd:string">${localStorage.getItem("sesion") ? localStorage.getItem("sesion") : ""}</Sesion>
+              <Usuario xsi:type="xsd:string">${localStorage.getItem("user") || ""}</Usuario>
+              <Sesion xsi:type="xsd:string">${localStorage.getItem("sesion") || ""}</Sesion>
               <Origen xsi:type="xsd:string">WEB</Origen>
             </Credencial>
             <Fechad xsi:type="xsd:string"></Fechad>
             <Fechah xsi:type="xsd:string"></Fechah>
-            <Vfechad xsi:type="xsd:string">${dateStart ? dateStart : ""}</Vfechad>
-            <Vfechah xsi:type="xsd:string">${dateEnd ? dateEnd : ""}</Vfechah>
-            <Tags xsi:type="xsd:string">${tags ? tags : ""}</Tags>
-            <Tarea xsi:type="xsd:string">${tarea ? tarea : ""}</Tarea>
-            <Asunto xsi:type="xsd:string">${asunto ? asunto : ""}</Asunto>
-            <Afecta xsi:type="xsd:string">${afecta ? afecta : ""}</Afecta>
-            <Orden xsi:type="xsd:string">${orden ? orden : ""}</Orden>
-            <Origen xsi:type="xsd:string">${origen ? origen : ""}</Origen>
-            <Estado xsi:type="xsd:string">${estado ? estado : ""}</Estado>
+            <Vfechad xsi:type="xsd:string">${dateStart || ""}</Vfechad>
+            <Vfechah xsi:type="xsd:string">${dateEnd || ""}</Vfechah>
+            <Tags xsi:type="xsd:string">${tags || ""}</Tags>
+            <Tarea xsi:type="xsd:string">${tarea || ""}</Tarea>
+            <Asunto xsi:type="xsd:string">${asunto || ""}</Asunto>
+            <Afecta xsi:type="xsd:string">${afecta || ""}</Afecta>
+            <Orden xsi:type="xsd:string">${orden || ""}</Orden>
+            <Origen xsi:type="xsd:string">${origen || ""}</Origen>
+            <Estado xsi:type="xsd:string">${estado || ""}</Estado>
           </urn:nube_consultareas>
         </soapenv:Body>
       </soapenv:Envelope>`;
 
-    const response = await axios.post(SOAP_SERVER_URL, soapRequest);
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(response.data, 'text/xml');
+    let response;
+    let xmlDoc;
+    let correctStructure = false;
+
+    // Implementar el ciclo hasta obtener la estructura correcta
+    while (!correctStructure) {
+      response = await axios.post(SOAP_SERVER_URL, soapRequest);
+      const parser = new DOMParser();
+      xmlDoc = parser.parseFromString(response.data, 'text/xml');
+
+      // Verifica la estructura
+      const responseNode = xmlDoc.querySelector('nube_consultareasResponse');
+      const returnNode = responseNode?.querySelector('return');
+      const itemsNode = returnNode?.querySelector('Items');
+
+      if (responseNode && returnNode && itemsNode) {
+        correctStructure = true;
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Esperar antes de intentar de nuevo
+      }
+    }
+
+    // Aquí ya puedes continuar procesando los datos como lo haces normalmente
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
-
     const errorid = erroridNode ? erroridNode.textContent : "";
     const errornombre = errornombreNode ? errornombreNode.textContent : "";
 
@@ -66,11 +86,13 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
     };
 
     return jsonData;
+
   } catch (error) {
     console.error(error);
     throw error;
   }
 };
+
 
 export const checkSoapForEditTaskService = async (orden) => {
   try {
@@ -123,7 +145,7 @@ export const checkSoapForEditTaskService = async (orden) => {
 };
 
 
-export const getTaskForOrder = async(orden) => {
+export const getTaskForOrder = async (orden) => {
 
   try {
     const soapRequest = `
@@ -502,7 +524,7 @@ export const getFileService = async (options) => {
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, "text/xml");
-    
+
     const erroridNode = xmlDoc.querySelector("Errorid");
     const errornombreNode = xmlDoc.querySelector("Errornombre");
 
