@@ -1,7 +1,7 @@
 import axios from "axios";
 import { SOAP_SERVER_URL } from "../../utils";
 
-export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, estado, asunto, orden, origen) => {
+export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, estado, asunto, orden, origen, privado) => {
   try {
 
     const soapRequest = `
@@ -25,33 +25,16 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
             <Orden xsi:type="xsd:string">${orden || ""}</Orden>
             <Origen xsi:type="xsd:string">${origen || ""}</Origen>
             <Estado xsi:type="xsd:string">${estado || ""}</Estado>
+            <Privado xsi:type="xsd:string">${privado || 0}</Privado>
           </urn:nube_consultareas>
         </soapenv:Body>
       </soapenv:Envelope>`;
 
     let response;
     let xmlDoc;
-    let correctStructure = false;
-
-    // Implementar el ciclo hasta obtener la estructura correcta
-    while (!correctStructure) {
-      response = await axios.post(SOAP_SERVER_URL, soapRequest);
-      const parser = new DOMParser();
-      xmlDoc = parser.parseFromString(response.data, 'text/xml');
-
-      // Verifica la estructura
-      const responseNode = xmlDoc.querySelector('nube_consultareasResponse');
-      const returnNode = responseNode?.querySelector('return');
-      const itemsNode = returnNode?.querySelector('Items');
-
-      if (responseNode && returnNode && itemsNode) {
-        correctStructure = true;
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Esperar antes de intentar de nuevo
-      }
-    }
-
-    // Aquí ya puedes continuar procesando los datos como lo haces normalmente
+    response = await axios.post(SOAP_SERVER_URL, soapRequest);
+    const parser = new DOMParser();
+    xmlDoc = parser.parseFromString(response.data, 'text/xml');
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
     const errorid = erroridNode ? erroridNode.textContent : "";
@@ -209,7 +192,6 @@ export const getTaskForOrder = async (orden) => {
 };
 
 export const createTaskService = async (options) => {
-
   try {
     const soapRequest =
       `<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
@@ -239,6 +221,7 @@ export const createTaskService = async (options) => {
                <Estadod xsi:type="xsd:string"></Estadod>
                <Estadof xsi:type="xsd:string"></Estadof>
                <Afectado xsi:type="xsd:string"></Afectado>
+               <Privado xsi:type="xsd:string">${options?.privado || 0}</Privado>
             </Items>
          </urn:nube_altatareas>
       </soapenv:Body>
@@ -480,6 +463,7 @@ export const uploadFileService = async (options) => {
     </soapenv:Envelope>`;
   try {
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
+
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
 
@@ -644,6 +628,41 @@ export const userInfoService = async () => {
       Email: email,
       Cuit: cuit,
       Alta: alta,
+    };
+    return jsonData;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const deleteTaskService = async ({ usuario, sesion, tarea }) => {
+  const soapRequest = `<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:nube_borratareas soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+         <Credencial xsi:type="urn:Tcredencial" xmlns:urn="urn:cpcesfeIntf">
+            <Usuario xsi:type="xsd:string">${usuario}</Usuario>
+            <Sesion xsi:type="xsd:string">${sesion}</Sesion>
+            <Origen xsi:type="xsd:string">WEB</Origen>
+         </Credencial>
+         <Tarea xsi:type="xsd:string">${tarea}</Tarea>
+         <Estado xsi:type="xsd:string"></Estado>
+      </urn:nube_borratareas>
+   </soapenv:Body>
+</soapenv:Envelope>`;
+  try {
+    const response = await axios.post(SOAP_SERVER_URL, soapRequest);
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(response.data, "text/xml");
+
+    const errorid = xmlDoc.getElementsByTagName("Errorid")[0].textContent;
+    const errornombre = xmlDoc.getElementsByTagName("Errornombre")[0].textContent;
+
+    const jsonData = {
+      Errorid: errorid,
+      Errornombre: errornombre,
     };
     return jsonData;
   } catch (error) {

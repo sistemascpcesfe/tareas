@@ -12,7 +12,10 @@ import {
     Tag,
     TagLabel,
     TagCloseButton,
-    useToast
+    useToast,
+    RadioGroup,
+    Stack,
+    Radio
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { createTaskService, tagService, typesTasksService, usersService } from '../../service/tarea';
@@ -37,6 +40,7 @@ const FormComponent = () => {
         selectedType: '',
         selectedUsers: [],
         alcance: '',
+        privado: 0
     });
 
     useEffect(() => {
@@ -116,6 +120,10 @@ const FormComponent = () => {
             newErrors.selectedUsers = 'Al menos un usuario es requerido.';
         }
 
+        if (formData.privado === null) {
+            newErrors.selectedPriv = 'Debe seleccionar si quiere que la tarea sea privada o global.';
+        }
+
         // Validación específica para alcance si el tipo es 3
         if (formData.selectedType === '3' && !formData.alcance) {
             newErrors.alcance = 'El alcance es requerido para este tipo de tarea.';
@@ -138,7 +146,8 @@ const FormComponent = () => {
                     Tag: formData.selectedTags.join(','),
                     Tarea: formData.selectedType,
                     Afecta: formData.selectedUsers.join(','),
-                    Alcance: formData.alcance ? formData.alcance : 'todos'
+                    Alcance: formData.alcance ? formData.alcance : 'todos',
+                    Privado: formData.privado ? formData.privado : 0
                 });
 
                 triggerUpdate()
@@ -334,6 +343,23 @@ const FormComponent = () => {
                                     </Tag>
                                 ))}
                             </div>
+                        </FormControl>
+                    </GridItem>
+                    <GridItem colSpan={1}>
+                        <FormControl isRequired isInvalid={errors.selectedPriv}>
+                            <FormLabel>Privacidad</FormLabel>
+                            <RadioGroup
+                                onChange={(value) => setFormData({ ...formData, privado: parseInt(value, 10) })}
+                                value={formData.privado}
+                            >
+                                <Stack direction="row">
+                                    <Radio value={0}>Global</Radio>
+                                    <Radio value={1}>Privado</Radio>
+                                </Stack>
+                            </RadioGroup>
+                            {errors.selectedPriv && (
+                                <FormErrorMessage>{errors.selectedPriv}</FormErrorMessage>
+                            )}
                         </FormControl>
                     </GridItem>
                 </Grid>

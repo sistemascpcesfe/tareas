@@ -16,7 +16,7 @@ import { capitalizeFirstLetter } from '../../../utils/index';
 import { useTask } from '../../../provider/taskProvider';
 
 const FiltersComponent = () => {
-    const { filters, setFilters, filterOptions } = useTask();
+    const { filters, setFilters, filterOptions, loading } = useTask();
 
     const handleFilterChange = (selectedValues, type) => {
         setFilters(prevFilters => ({
@@ -25,6 +25,9 @@ const FiltersComponent = () => {
         }));
     };
 
+    if (loading) {
+        return <div>Cargando</div>
+    }
     return (
         <div className='flex flex-col gap-2'>
             <div className="grid grid-cols-5 gap-4">
@@ -166,28 +169,6 @@ const FiltersComponent = () => {
                         </PopoverContent>
                     </Popover>
                 </div>
-                {/* <div className="flex flex-col">
-                    <RadioGroup
-                        defaultValue='global'
-                    >
-                        <div className="flex flex-col">
-                            <Radio
-                                key="personal"
-                                value="personal"
-                                className="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                            >
-                                Personal
-                            </Radio>
-                            <Radio
-                                key="global"
-                                value="global"
-                                className="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                            >
-                                Global
-                            </Radio>
-                        </div>
-                    </RadioGroup >
-                </div> */}
             </div>
         </div>
     );

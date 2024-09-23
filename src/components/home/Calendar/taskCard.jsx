@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { getColorForTaskType } from '../../../utils';
+import DeleteButton from '../../buttons/DeleteButton';
 
 const TaskCard = ({ task, today }) => {
     const navigate = useNavigate();
@@ -64,9 +65,12 @@ const TaskCard = ({ task, today }) => {
                         <div className='flex flex-col'>
                             <span>{task.fechav.slice(10, 16) + "hs"}</span>
                             <Text noOfLines={3}>{task.cuerpo}</Text>
-                            <Button mt={2} size="md" colorScheme={color} onClick={navigateToDetail}>
-                                Ver detalle
-                            </Button>
+                            <div className='flex w-full gap-2 mt-2'>
+                                <Button className='w-full' size="md" colorScheme={color} onClick={navigateToDetail}>
+                                    Ver detalle
+                                </Button>
+                                <DeleteButton size={24} id={task.orden} />
+                            </div>
                         </div>
                     </PopoverBody>
                 </PopoverContent>

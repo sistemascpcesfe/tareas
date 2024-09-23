@@ -16,6 +16,7 @@ import CreateTask from "../../buttons/CreateTask";
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useState } from "react";
+import ToggleButtonGroup from "../../buttons/ToggleButtonGroup"; // Importa el nuevo componente
 
 dayjs.locale('es');
 
@@ -67,6 +68,7 @@ const Header = () => {
                         <Button variant='ghost' onClick={goToNextMonth}><FaChevronRight size={20} /></Button>
                     </div>
                     <div className="col-span-2 flex items-center justify-end gap-4">
+                        {/* <ToggleButtonGroup /> */}
                         <CreateTask />
                         <LogoutButton />
                     </div>

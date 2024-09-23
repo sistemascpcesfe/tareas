@@ -4,6 +4,7 @@ import FileButton from "../../buttons/fileButton";
 import RepeatButton from "../../buttons/RepeatButton";
 import StatusButton from "../../buttons/StatusButton";
 import EditButton from "../../buttons/EditButton";
+import DeleteButton from "../../buttons/DeleteButton";
 
 const HeaderCard = ({ afectado, color, task, isLoadingTask, files, isLoadingFiles }) => {
 
@@ -20,6 +21,7 @@ const HeaderCard = ({ afectado, color, task, isLoadingTask, files, isLoadingFile
                     {!afectado ? (
                         <DeriveButton size={size} colorScheme={color} task={task} />
                     ) : null}
+                    <DeleteButton size={size} id={task.orden} isInCard />
                 </>
             ) : null}
         </Box>
