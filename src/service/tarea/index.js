@@ -267,8 +267,8 @@ export const typesTasksService = async () => {
        </urn:nube_nubetareas>
     </soapenv:Body>
  </soapenv:Envelope>`;
-    const response = await axios.post(SOAP_SERVER_URL, soapRequest);
 
+    const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, "text/xml");
 
@@ -278,12 +278,29 @@ export const typesTasksService = async () => {
     const errorid = erroridNode?.textContent;
     const errornombre = errornombreNode?.textContent;
 
-    const items = xmlDoc.querySelectorAll("item");
-    const itemData = Array.from(items).map((item) => {
-      const codigo = item.querySelector("Codigo")?.textContent;
-      const codigod = item.querySelector("Codigod")?.textContent;
-      return { codigo, codigod };
-    });
+    let items = xmlDoc.querySelectorAll("item");
+    let itemData = [];
+
+    // Si los items tienen referencias (href), resolver los IDs referenciados
+    if (items.length > 0 && items[0].getAttribute("href")) {
+      // Resolvemos las referencias
+      items.forEach((item) => {
+        const hrefId = item.getAttribute("href").replace("#", "");
+        const referencedNode = xmlDoc.querySelector(`[id="${hrefId}"]`);
+        if (referencedNode) {
+          const codigo = referencedNode.querySelector("Codigo")?.textContent;
+          const codigod = referencedNode.querySelector("Codigod")?.textContent;
+          itemData.push({ codigo, codigod });
+        }
+      });
+    } else {
+      // Estructura directa con <Codigo> y <Codigod> dentro de <item>
+      items.forEach((item) => {
+        const codigo = item.querySelector("Codigo")?.textContent;
+        const codigod = item.querySelector("Codigod")?.textContent;
+        itemData.push({ codigo, codigod });
+      });
+    }
 
     const jsonData = {
       Errorid: errorid,
@@ -291,12 +308,14 @@ export const typesTasksService = async () => {
       items: itemData,
     };
 
+    console.log(jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
     throw error;
   }
 };
+
 
 //TAGS DE TAREAS
 export const tagService = async () => {
@@ -327,12 +346,26 @@ export const tagService = async () => {
 
     let tags = [];
 
-    // Buscar todos los elementos <Tag> dentro del documento XML
-    const tagNodes = xmlDoc.querySelectorAll('Tag');
-    tagNodes.forEach(tagNode => {
-      const tag = tagNode.textContent;
-      tags.push(tag);
-    });
+    // Verifica si la estructura contiene referencias href o elementos directos
+    const itemNodes = xmlDoc.querySelectorAll('item');
+    if (itemNodes.length > 0 && itemNodes[0].getAttribute('href')) {
+      // Si los items tienen href, buscar por ID en lugar de usar querySelector
+      itemNodes.forEach(itemNode => {
+        const hrefId = itemNode.getAttribute('href').replace('#', ''); // Remover el '#' del href
+        const referencedNode = xmlDoc.querySelector(`[id="${hrefId}"]`); // Buscar el nodo con el atributo id
+        const tagNode = referencedNode?.querySelector('Tag');
+        if (tagNode) {
+          tags.push(tagNode.textContent);
+        }
+      });
+    } else {
+      // Estructura directa con <Tag> dentro de <item>
+      const tagNodes = xmlDoc.querySelectorAll('Tag');
+      tagNodes.forEach(tagNode => {
+        const tag = tagNode.textContent;
+        tags.push(tag);
+      });
+    }
 
     const jsonData = {
       Errorid: errorid,
@@ -346,6 +379,8 @@ export const tagService = async () => {
     throw error;
   }
 };
+
+
 
 
 //ESTADOS DE TAREAS

@@ -17,20 +17,17 @@ import {
     Stack,
     Radio
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import { createTaskService, tagService, typesTasksService, usersService } from '../../service/tarea';
+import { useState } from 'react';
+import { createTaskService } from '../../service/tarea';
 import dayjs from 'dayjs';
 import { useTask } from '../../provider/taskProvider';
 import { useNavigate } from 'react-router-dom';
 
 const FormComponent = () => {
     const navigate = useNavigate()
+    const { filterOptions, loading } = useTask()
     const toast = useToast()
     const { triggerUpdate } = useTask();
-    const [tags, setTags] = useState([]);
-    const [types, setTypes] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState({});
     const [formData, setFormData] = useState({
         date: '',
@@ -42,26 +39,6 @@ const FormComponent = () => {
         alcance: '',
         privado: 0
     });
-
-    useEffect(() => {
-        getDataService();
-    }, []);
-
-    const getDataService = async () => {
-        try {
-            setLoading(true);
-            const tagsRes = await tagService();
-            setTags(tagsRes.tags);
-            const typesRes = await typesTasksService();
-            setTypes(typesRes.items);
-            const usersRes = await usersService();
-            setUsers(usersRes.items);
-            setLoading(false);
-        } catch (error) {
-            console.log(error);
-            setLoading(false);
-        }
-    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -193,7 +170,7 @@ const FormComponent = () => {
                                 defaultValue={''}
                             >
                                 <option value='' disabled>Seleccione el tipo</option>
-                                {types.map(type => (
+                                {filterOptions.types.map(type => (
                                     <option key={type.codigo} value={type.codigo}>{type.codigod}</option>
                                 ))}
                             </Select>
@@ -267,7 +244,7 @@ const FormComponent = () => {
                                 defaultValue={''}
                             >
                                 <option value='' disabled>Seleccione un tag</option>
-                                {tags.map(tag => (
+                                {filterOptions.tags.map(tag => (
                                     <option key={tag} value={tag}>{tag}</option>
                                 ))}
                             </Select>
@@ -322,7 +299,7 @@ const FormComponent = () => {
                                 defaultValue={''}
                             >
                                 <option value='' disabled>Seleccione un usuario</option>
-                                {users.map(user => (
+                                {filterOptions.users.map(user => (
                                     <option key={user.codigo} value={user.codigo}>{user.denominacion}</option>
                                 ))}
                             </Select>
