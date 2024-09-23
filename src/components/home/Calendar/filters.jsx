@@ -10,7 +10,7 @@ import {
     PopoverCloseButton,
     PopoverArrow,
     RadioGroup,
-    Radio
+    Radio,
 } from '@chakra-ui/react';
 import { capitalizeFirstLetter } from '../../../utils/index';
 import { useTask } from '../../../provider/taskProvider';
@@ -19,45 +19,48 @@ const FiltersComponent = () => {
     const { filters, setFilters, filterOptions, loading } = useTask();
 
     const handleFilterChange = (selectedValues, type) => {
-        setFilters(prevFilters => ({
+        setFilters((prevFilters) => ({
             ...prevFilters,
-            [type]: selectedValues
+            [type]: selectedValues,
         }));
     };
 
     if (loading) {
-        return <div>Cargando</div>
+        return <div>Cargando</div>;
     }
     return (
-        <div className='flex flex-col gap-2'>
+        <div className="flex flex-col gap-2">
             <div className="grid grid-cols-5 gap-4">
                 {/* Tipos de tarea */}
                 <div className="flex flex-col">
                     <Popover>
                         <PopoverTrigger>
-                            <Button size="sm" width="100%">Tipos</Button>
+                            <Button size="sm" width="100%">
+                                Tipos
+                            </Button>
                         </PopoverTrigger>
                         <PopoverContent>
                             <PopoverArrow />
                             <PopoverCloseButton />
                             <PopoverHeader>Tipos</PopoverHeader>
-                            <PopoverBody size='lg'>
+                            <PopoverBody size="lg">
                                 <RadioGroup
                                     value={filters.types}
-                                    onChange={(values) => handleFilterChange(values, "types")}
+                                    onChange={(values) => handleFilterChange(values, 'types')}
                                 >
                                     <div className="grid grid-cols-2 gap-2">
-                                        {filterOptions.types.map((e) => (
+                                        {filterOptions.types.map((e, index) => (
                                             <Radio
-                                                key={e.codigo}
+                                                key={`type-${e.codigo || index}`} // Backup with index if codigo is missing
                                                 value={e.codigo}
                                                 className="whitespace-nowrap overflow-hidden overflow-ellipsis"
                                             >
-                                                {e.codigod && capitalizeFirstLetter(e.codigod.toLowerCase())}
+                                                {e.codigod &&
+                                                    capitalizeFirstLetter(e.codigod.toLowerCase())}
                                             </Radio>
                                         ))}
                                         <Radio
-                                            key="todos"
+                                            key="type-todos"
                                             value=""
                                             className="whitespace-nowrap overflow-hidden overflow-ellipsis"
                                         >
@@ -69,10 +72,14 @@ const FiltersComponent = () => {
                         </PopoverContent>
                     </Popover>
                 </div>
-                <div className="flex flex-col" >
-                    <Popover >
+
+                {/* Etiquetas */}
+                <div className="flex flex-col">
+                    <Popover>
                         <PopoverTrigger>
-                            <Button size="sm" width="100%">Etiquetas</Button>
+                            <Button size="sm" width="100%">
+                                Etiquetas
+                            </Button>
                         </PopoverTrigger>
                         <PopoverContent>
                             <PopoverArrow />
@@ -81,12 +88,12 @@ const FiltersComponent = () => {
                             <PopoverBody>
                                 <CheckboxGroup
                                     value={filters.tags}
-                                    onChange={(values) => handleFilterChange(values, "tags")}
+                                    onChange={(values) => handleFilterChange(values, 'tags')}
                                 >
                                     <div className="grid grid-cols-2 gap-2">
                                         {filterOptions.tags.map((e, index) => (
                                             <Checkbox
-                                                key={e + index} // Asegura que cada key sea único
+                                                key={`tag-${e || index}`} // Use index if tag is missing or duplicate
                                                 value={e}
                                                 className="whitespace-nowrap overflow-hidden overflow-ellipsis"
                                             >
@@ -104,7 +111,9 @@ const FiltersComponent = () => {
                 <div className="flex flex-col">
                     <Popover>
                         <PopoverTrigger>
-                            <Button size="sm" width="100%">Usuarios</Button>
+                            <Button size="sm" width="100%">
+                                Usuarios
+                            </Button>
                         </PopoverTrigger>
                         <PopoverContent>
                             <PopoverArrow />
@@ -113,16 +122,17 @@ const FiltersComponent = () => {
                             <PopoverBody>
                                 <CheckboxGroup
                                     value={filters.users}
-                                    onChange={(values) => handleFilterChange(values, "users")}
+                                    onChange={(values) => handleFilterChange(values, 'users')}
                                 >
                                     <div className="grid grid-cols-2 gap-2">
-                                        {filterOptions.users.map((e) => (
+                                        {filterOptions.users.map((e, index) => (
                                             <Checkbox
-                                                key={e.codigo}
+                                                key={`user-${e.codigo || index}`} // Use index as fallback if codigo is missing
                                                 value={e.codigo}
                                                 className="whitespace-nowrap overflow-hidden overflow-ellipsis"
                                             >
-                                                {e.denominacion && capitalizeFirstLetter(e.denominacion.toLowerCase())}
+                                                {e.denominacion &&
+                                                    capitalizeFirstLetter(e.denominacion.toLowerCase())}
                                             </Checkbox>
                                         ))}
                                     </div>
@@ -131,40 +141,44 @@ const FiltersComponent = () => {
                         </PopoverContent>
                     </Popover>
                 </div>
+
                 {/* Estados */}
                 <div className="flex flex-col">
                     <Popover>
                         <PopoverTrigger>
-                            <Button size="sm" width="100%">Estados</Button>
+                            <Button size="sm" width="100%">
+                                Estados
+                            </Button>
                         </PopoverTrigger>
                         <PopoverContent>
                             <PopoverArrow />
                             <PopoverCloseButton />
                             <PopoverHeader>Estados</PopoverHeader>
-                            <PopoverBody size='lg'>
+                            <PopoverBody size="lg">
                                 <RadioGroup
                                     value={filters.status}
-                                    onChange={(values) => handleFilterChange(values, "status")}
+                                    onChange={(values) => handleFilterChange(values, 'status')}
                                 >
                                     <div className="grid grid-cols-2 gap-2">
-                                        {filterOptions.status.map((e) => (
+                                        {filterOptions.status.map((e, index) => (
                                             <Radio
-                                                key={e.codigo}
+                                                key={`status-${e.codigo || index}`} // Backup with index if codigo is missing
                                                 value={e.codigo}
                                                 className="whitespace-nowrap overflow-hidden overflow-ellipsis"
                                             >
-                                                {e.codigod && capitalizeFirstLetter(e.codigod.toLowerCase())}
+                                                {e.codigod &&
+                                                    capitalizeFirstLetter(e.codigod.toLowerCase())}
                                             </Radio>
                                         ))}
                                         <Radio
-                                            key="todos"
+                                            key="status-todos"
                                             value=""
                                             className="whitespace-nowrap overflow-hidden overflow-ellipsis"
                                         >
                                             Todos
                                         </Radio>
                                     </div>
-                                </RadioGroup >
+                                </RadioGroup>
                             </PopoverBody>
                         </PopoverContent>
                     </Popover>

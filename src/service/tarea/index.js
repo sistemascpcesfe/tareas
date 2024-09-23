@@ -3,7 +3,6 @@ import { SOAP_SERVER_URL } from "../../utils";
 
 export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, estado, asunto, orden, origen, privado) => {
   try {
-
     const soapRequest = `
       <soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
         <soapenv:Header/>
@@ -30,37 +29,36 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
         </soapenv:Body>
       </soapenv:Envelope>`;
 
-    let response;
-    let xmlDoc;
-    response = await axios.post(SOAP_SERVER_URL, soapRequest);
+    const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
-    xmlDoc = parser.parseFromString(response.data, 'text/xml');
+    const xmlDoc = parser.parseFromString(response.data, 'text/xml');
+
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
-    const errorid = erroridNode ? erroridNode.textContent : "";
-    const errornombre = errornombreNode ? errornombreNode.textContent : "";
+    const errorid = erroridNode?.textContent || "";
+    const errornombre = errornombreNode?.textContent || "";
 
-    const items = xmlDoc.querySelectorAll('item');
-    const itemData = Array.from(items).map(item => {
-      const orden = item.querySelector('Orden')?.textContent;
-      const tag = item.querySelector('Tag')?.textContent;
-      const tarea = item.querySelector('Tarea')?.textContent;
-      const taread = item.querySelector('Taread')?.textContent;
-      const asunto = item.querySelector('Asunto')?.textContent;
-      const alcance = item.querySelector('Alcance')?.textContent;
-      const origen = item.querySelector('Origen')?.textContent;
-      const fechai = item.querySelector('Fechai')?.textContent;
-      const fecha = item.querySelector('Fecha')?.textContent;
-      const fechav = item.querySelector('Fechav')?.textContent;
-      const usuario = item.querySelector('Usuario')?.textContent;
-      const cuerpo = item.querySelector('Cuerpo')?.textContent;
-      const afecta = item.querySelector('Afecta')?.textContent;
-      const estado = item.querySelector('Estado')?.textContent;
-      const estadod = item.querySelector('Estadod')?.textContent;
-      const estadof = item.querySelector('Estadof')?.textContent;
-      const afectado = item.querySelector('Afectado')?.textContent;
-      return { origen, orden, tarea, taread, asunto, alcance, tag, fecha, fechav, usuario, cuerpo, afecta, estado, fechai, estadod, estadof, afectado };
-    });
+    let items = xmlDoc.querySelectorAll('item');
+    let itemData = [];
+
+    // Verificar si los items tienen referencias 'href'
+    if (items.length > 0 && items[0].getAttribute('href')) {
+      // Resuelve referencias de 'href' y busca nodos por id
+      items.forEach((item) => {
+        const hrefId = item.getAttribute('href').replace("#", "");
+        const referencedNode = xmlDoc.querySelector(`[id="${hrefId}"]`);
+        if (referencedNode) {
+          const itemDataExtracted = extractItemData(referencedNode);
+          itemData.push(itemDataExtracted);
+        }
+      });
+    } else {
+      // Si no hay 'href', procesa los items directamente
+      items.forEach((item) => {
+        const itemDataExtracted = extractItemData(item);
+        itemData.push(itemDataExtracted);
+      });
+    }
 
     const jsonData = {
       Errorid: errorid,
@@ -75,6 +73,48 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
     throw error;
   }
 };
+
+// Función auxiliar para extraer datos del nodo de tarea
+function extractItemData(item) {
+  const orden = item.querySelector('Orden')?.textContent || "";
+  const tag = item.querySelector('Tag')?.textContent || "";
+  const tarea = item.querySelector('Tarea')?.textContent || "";
+  const taread = item.querySelector('Taread')?.textContent || "";
+  const asunto = item.querySelector('Asunto')?.textContent || "";
+  const alcance = item.querySelector('Alcance')?.textContent || "";
+  const origen = item.querySelector('Origen')?.textContent || "";
+  const fechai = item.querySelector('Fechai')?.textContent || "";
+  const fecha = item.querySelector('Fecha')?.textContent || "";
+  const fechav = item.querySelector('Fechav')?.textContent || "";
+  const usuario = item.querySelector('Usuario')?.textContent || "";
+  const cuerpo = item.querySelector('Cuerpo')?.textContent || "";
+  const afecta = item.querySelector('Afecta')?.textContent || "";
+  const estado = item.querySelector('Estado')?.textContent || "";
+  const estadod = item.querySelector('Estadod')?.textContent || "";
+  const estadof = item.querySelector('Estadof')?.textContent || "";
+  const afectado = item.querySelector('Afectado')?.textContent || "";
+
+  return {
+    orden,
+    tag,
+    tarea,
+    taread,
+    asunto,
+    alcance,
+    origen,
+    fechai,
+    fecha,
+    fechav,
+    usuario,
+    cuerpo,
+    afecta,
+    estado,
+    estadod,
+    estadof,
+    afectado
+  };
+}
+
 
 
 export const checkSoapForEditTaskService = async (orden) => {
@@ -230,7 +270,7 @@ export const createTaskService = async (options) => {
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
-
+    console.log(xmlDoc)
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
     const idNode = xmlDoc.querySelector('Id')
@@ -308,7 +348,6 @@ export const typesTasksService = async () => {
       items: itemData,
     };
 
-    console.log(jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
