@@ -232,6 +232,7 @@ export const getTaskForOrder = async (orden) => {
 };
 
 export const createTaskService = async (options) => {
+  console.log(options)
   try {
     const soapRequest =
       `<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
@@ -266,6 +267,7 @@ export const createTaskService = async (options) => {
          </urn:nube_altatareas>
       </soapenv:Body>
    </soapenv:Envelope>`;
+    console.log(soapRequest)
 
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
     const parser = new DOMParser();
@@ -348,6 +350,7 @@ export const typesTasksService = async () => {
       items: itemData,
     };
 
+    console.log("Tipos: ", jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
@@ -412,6 +415,7 @@ export const tagService = async () => {
       tags: tags,
     };
 
+    console.log("Tags: ", jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
@@ -461,6 +465,7 @@ export const statusTasksService = async () => {
       items: itemData,
     };
 
+    console.log("Estaados: ", jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
@@ -628,23 +633,40 @@ export const usersService = async () => {
                 </urn:base_usuarios>
                 </soapenv:Body>
             </soapenv:Envelope>`;
+
   try {
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
 
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, "text/xml");
+
     const erroridNode = xmlDoc.querySelector("Errorid");
     const errornombreNode = xmlDoc.querySelector("Errornombre");
 
     const errorid = erroridNode?.textContent;
     const errornombre = errornombreNode?.textContent;
 
-    const items = xmlDoc.querySelectorAll("item");
-    const itemData = Array.from(items).map((item) => {
-      const denominacion = item.querySelector("Denominacion")?.textContent;
-      const codigo = item.querySelector("Codigo")?.textContent;
-      return { denominacion, codigo };
-    });
+    let items = xmlDoc.querySelectorAll("item");
+    let itemData = [];
+
+    // Verifica si los items tienen referencias 'href'
+    if (items.length > 0 && items[0].getAttribute('href')) {
+      // Resuelve referencias de 'href' y busca nodos por id
+      items.forEach((item) => {
+        const hrefId = item.getAttribute('href').replace("#", "");
+        const referencedNode = xmlDoc.querySelector(`[id="${hrefId}"]`);
+        if (referencedNode) {
+          const itemDataExtracted = extractUserData(referencedNode);
+          itemData.push(itemDataExtracted);
+        }
+      });
+    } else {
+      // Si no hay 'href', procesa los items directamente
+      items.forEach((item) => {
+        const itemDataExtracted = extractUserData(item);
+        itemData.push(itemDataExtracted);
+      });
+    }
 
     const jsonData = {
       Errorid: errorid,
@@ -652,12 +674,24 @@ export const usersService = async () => {
       items: itemData,
     };
 
-    return jsonData
+    console.log("Usuarios: ", jsonData)
+    return jsonData;
   } catch (error) {
     console.error(error);
     throw error;
   }
 };
+
+function extractUserData(item) {
+  const codigo = item.querySelector("Codigo")?.textContent || "";
+  const denominacion = item.querySelector("Denominacion")?.textContent || "";
+
+  return {
+    codigo,
+    denominacion
+  };
+}
+
 
 export const userInfoService = async () => {
   const soapRequest = `<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:cpcesfeIntf-Icpcesfe">
