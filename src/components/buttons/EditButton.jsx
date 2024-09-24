@@ -198,7 +198,7 @@ const EditButton = ({ task, size }) => {
             }
         }
     };
-    console.log(filterOptions)
+    console.log(task)
 
     return (
         <>
@@ -226,7 +226,7 @@ const EditButton = ({ task, size }) => {
                                                 name='selectedType'
                                                 value={formData.selectedType}
                                                 onChange={handleSelectChange}
-                                                defaultValue={task.orden}
+                                                defaultValue={task.tarea}
                                             >
                                                 {filterOptions.types.map((type) => (
                                                     <option key={type.codigo} value={type.codigo}>
@@ -245,16 +245,12 @@ const EditButton = ({ task, size }) => {
                                             <FormLabel>Tipo</FormLabel>
                                             <Select
                                                 name='selectedType'
-                                                value={formData.selectedType}
+                                                value={task.taread}
                                                 onChange={handleSelectChange}
-                                                defaultValue={task.orden}
+                                                defaultValue={task.tarea}
+                                                placeholder={task.taread}
                                                 disabled
                                             >
-                                                {filterOptions.types.map((type) => (
-                                                    <option key={type.codigo} value={type.codigo}>
-                                                        {type.codigod}
-                                                    </option>
-                                                ))}
                                             </Select>
                                             {!errors.selectedType ? null : (
                                                 <FormErrorMessage>{errors.selectedType}</FormErrorMessage>
