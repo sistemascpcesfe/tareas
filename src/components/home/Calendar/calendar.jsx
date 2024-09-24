@@ -78,7 +78,7 @@ const Calendar = () => {
             if (res.Errorid === "00") {
                 toast({
                     title: 'Tarea actualizada correctamente',
-                    description: `Se actualizo correctamente la tarea con id: ${res.id}`,
+                    description: `Se actualizo correctamente la tarea`,
                     status: 'success',
                     duration: 5000,
                     isClosable: true,

@@ -26,7 +26,7 @@ const FiltersComponent = () => {
     };
 
     if (loading) {
-        return <div>Cargando</div>;
+        return <div>Cargando...</div>;
     }
     return (
         <div className="flex flex-col gap-2">

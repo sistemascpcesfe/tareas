@@ -270,6 +270,7 @@ export const createTaskService = async (options) => {
     console.log(soapRequest)
 
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
+    console.log(response)
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
     console.log(xmlDoc)
@@ -591,23 +592,44 @@ export const getFileService = async (options) => {
     const erroridNode = xmlDoc.querySelector("Errorid");
     const errornombreNode = xmlDoc.querySelector("Errornombre");
 
-    const errorid = erroridNode?.textContent;
-    const errornombre = errornombreNode?.textContent;
+    const errorid = erroridNode?.textContent || null;
+    const errornombre = errornombreNode?.textContent || null;
 
-    const items = xmlDoc.querySelectorAll("item");
+    let items = [];
 
-    const itemData = Array.from(items).map((item) => {
-      const asunto = item.querySelector("Asunto")?.textContent;
-      const archivo = item.querySelector("Archivo")?.textContent;
-      const cuerpo = item.querySelector("Cuerpo")?.textContent;
-      const orden = item.querySelector("Orden")?.textContent;
-      return { asunto, archivo, cuerpo, orden };
-    });
+    // Opción 1: Verifica si hay referencias con href
+    const hrefNode = xmlDoc.querySelector("return[href]");
+    if (hrefNode) {
+      // Encuentra el nodo referenciado por el href (por ejemplo, href="#1")
+      const refId = hrefNode.getAttribute('href').substring(1); // Elimina el "#" del id
+      const linkedNode = xmlDoc.getElementById(refId);
+
+      if (linkedNode) {
+        const itemNodes = linkedNode.querySelectorAll("item");
+        items = Array.from(itemNodes).map(() => {
+          const asunto = xmlDoc.querySelector(`Asunto`)?.textContent;
+          const archivo = xmlDoc.querySelector(`Archivo`)?.textContent;
+          const cuerpo = xmlDoc.querySelector(`Cuerpo`)?.textContent;
+          const orden = xmlDoc.querySelector(`Orden`)?.textContent;
+          return { asunto, archivo, cuerpo, orden };
+        });
+      }
+    } else {
+      // Opción 2: Los items están directamente dentro de <return>
+      const itemNodes = xmlDoc.querySelectorAll("item");
+      items = Array.from(itemNodes).map((item) => {
+        const asunto = item.querySelector("Asunto")?.textContent;
+        const archivo = item.querySelector("Archivo")?.textContent;
+        const cuerpo = item.querySelector("Cuerpo")?.textContent;
+        const orden = item.querySelector("Orden")?.textContent;
+        return { asunto, archivo, cuerpo, orden };
+      });
+    }
 
     const jsonData = {
       Errorid: errorid,
       Errornombre: errornombre,
-      items: itemData,
+      items,
     };
 
     return jsonData;
@@ -616,6 +638,7 @@ export const getFileService = async (options) => {
     throw error;
   }
 };
+
 
 //USUARIOS INVOLUCRADOS EN LAS TAREAS
 export const usersService = async () => {

@@ -87,7 +87,7 @@ const DetailComponente = ({ color, task, isLoadingTask, isDefaultOpen }) => {
                                                 <h3 className="text-dm font-semibold">Archivos:</h3>
                                                 {files.map((file, index) => (
                                                     <Button key={index} size="sm" colorScheme={color} onClick={() => handleDownload(file)} className="mr-2">
-                                                        {file.archivo.length > 35 ? `${file.archivo.substring(0, 35)}...` : file.archivo}
+                                                        {file?.archivo?.length > 35 ? `${file.archivo.substring(0, 35)}...` : file.archivo}
                                                     </Button>
                                                 ))}
                                             </Box>

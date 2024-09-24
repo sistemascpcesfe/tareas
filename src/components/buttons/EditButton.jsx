@@ -22,7 +22,7 @@ import {
     useToast
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { createTaskService, tagService, usersService } from '../../service/tarea';
+import { createTaskService } from '../../service/tarea';
 import dayjs from 'dayjs';
 import { useTask } from '../../provider/taskProvider';
 import { getColorForTags } from '../../utils';
@@ -32,12 +32,11 @@ import { useLoadingStatus } from '../../provider/loadingStatusProvider';
 const EditButton = ({ task, size }) => {
     const toast = useToast()
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { filterOptions, loading } = useTask()
     const { setIsStatus } = useLoadingStatus()
     const { triggerUpdate } = useTask()
-    const [tags, setTags] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState({});
+    const [userSesion, setUserSesion] = useState()
     const [formData, setFormData] = useState({
         date: '',
         title: '',
@@ -47,41 +46,32 @@ const EditButton = ({ task, size }) => {
         selectedUsers: [],
         alcance: '',
     });
+    const [showAlcance, setShowAlcance] = useState(false);
 
     useEffect(() => {
+        const user = localStorage.getItem("user")
+        setUserSesion(user)
         if (task) {
-            getDataService();
             initializeFormData();
         }
     }, []);
 
-    const getDataService = async () => {
-        try {
-            setLoading(true);
-            const tagsRes = await tagService();
-            setTags(tagsRes.tags);
-            const usersRes = await usersService();
-            setUsers(usersRes.items);
-            setLoading(false);
-        } catch (error) {
-            console.log(error);
-            setLoading(false);
-        }
-    };
-
     const initializeFormData = () => {
         const dateProp = formatDateTime(task.fechav);
+
         setFormData({
             ...formData,
             date: dateProp,
             title: task.asunto,
             description: task.cuerpo,
             selectedTags: task.tag.split(','),
-            selectedType: task.taread,
+            selectedType: task.codigo,
+            selectedTyped: task.codigod,
             selectedUsers: task.afecta.split(','),
             alcance: task.alcance ? task.alcance : '',
         });
     };
+
 
     const formatDateTime = (dateTimeString) => {
         const [datePart, timePart] = dateTimeString.split(' ');
@@ -103,21 +93,29 @@ const EditButton = ({ task, size }) => {
     const handleSelectChange = (e) => {
         const { name, value } = e.target;
 
-        // Si name corresponde a selectedTags, agrega el nuevo valor a la lista
-        if (name === 'selectedTags' || name === 'selectedUsers') {
+        if (name === 'selectedType') {
+            const selectedOption = filterOptions.types.find(type => type.codigo === value);
+
+            // Si el tipo seleccionado es 3, muestra el campo de alcance
+            setShowAlcance(selectedOption.codigo === '3');
+
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                selectedType: selectedOption.codigo,
+                selectedTyped: selectedOption.codigod
+            }));
+        } else if (name === 'selectedTags' || name === 'selectedUsers') {
             setFormData(prevFormData => ({
                 ...prevFormData,
                 [name]: [...prevFormData[name], value]
             }));
         } else {
-            // Para otros campos (como selectedType o selectedUsers), actualiza el valor directamente
             setFormData(prevFormData => ({
                 ...prevFormData,
                 [name]: value
             }));
         }
     };
-
 
     const handleTagRemove = (name, value) => {
         setFormData({
@@ -128,6 +126,10 @@ const EditButton = ({ task, size }) => {
 
     const validate = () => {
         const newErrors = {};
+
+        if (!formData.selectedType) {
+            newErrors.selectedType = 'El tipo es requerido.';
+        }
 
         if (!formData.title) {
             newErrors.title = 'El asunto es requerido.';
@@ -171,8 +173,8 @@ const EditButton = ({ task, size }) => {
                     Afecta: formData.selectedUsers.join(','),
                     Alcance: formData.alcance ? formData.alcance : 'todos',
                     Orden: task.orden,
-                    Tarea: task.tarea,
-                    Taread: task.taread
+                    Tarea: formData.selectedType, // Enviar el codigo
+                    Taread: formData.selectedTyped, // Enviar el codigod
                 });
                 toast({
                     title: 'Tarea Creada',
@@ -180,9 +182,9 @@ const EditButton = ({ task, size }) => {
                     status: 'success',
                     duration: 5000,
                     isClosable: true,
-                })
-                setIsStatus(true)
-                triggerUpdate()
+                });
+                setIsStatus(true);
+                triggerUpdate();
                 onClose();
             } catch (error) {
                 console.error('Error creating task:', error);
@@ -192,10 +194,11 @@ const EditButton = ({ task, size }) => {
                     status: 'error',
                     duration: 5000,
                     isClosable: true,
-                })
+                });
             }
         }
     };
+    console.log(filterOptions)
 
     return (
         <>
@@ -215,26 +218,73 @@ const EditButton = ({ task, size }) => {
 
                         <ModalBody>
                             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-                                <GridItem colSpan={1}>
-                                    <FormControl isInvalid={errors.selectedType}>
-                                        <FormLabel>Tipo</FormLabel>
-                                        <Select
-                                            name='selectedType'
-                                            defaultValue={task.tarea}
-                                            value={formData.selectedType}
-                                            onChange={handleInputChange}
-                                            disabled
-                                        >
-                                            <option key={task.tarea} value={task.tarea}>{task.taread}</option>
-                                        </Select>
-                                        {!errors.selectedType ? (
-                                            null
-                                        ) : (
-                                            <FormErrorMessage>{errors.selectedType}</FormErrorMessage>
-                                        )}
+                                {userSesion === "valeria" ? (
+                                    <GridItem colSpan={1}>
+                                        <FormControl isInvalid={errors.selectedType}>
+                                            <FormLabel>Tipo</FormLabel>
+                                            <Select
+                                                name='selectedType'
+                                                value={formData.selectedType}
+                                                onChange={handleSelectChange}
+                                                defaultValue={task.orden}
+                                            >
+                                                {filterOptions.types.map((type) => (
+                                                    <option key={type.codigo} value={type.codigo}>
+                                                        {type.codigod}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                            {!errors.selectedType ? null : (
+                                                <FormErrorMessage>{errors.selectedType}</FormErrorMessage>
+                                            )}
+                                        </FormControl>
+                                    </GridItem>
+                                ) : (
+                                    <GridItem colSpan={1}>
+                                        <FormControl isInvalid={errors.selectedType}>
+                                            <FormLabel>Tipo</FormLabel>
+                                            <Select
+                                                name='selectedType'
+                                                value={formData.selectedType}
+                                                onChange={handleSelectChange}
+                                                defaultValue={task.orden}
+                                                disabled
+                                            >
+                                                {filterOptions.types.map((type) => (
+                                                    <option key={type.codigo} value={type.codigo}>
+                                                        {type.codigod}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                            {!errors.selectedType ? null : (
+                                                <FormErrorMessage>{errors.selectedType}</FormErrorMessage>
+                                            )}
+                                        </FormControl>
+                                    </GridItem>
+                                )}
 
-                                    </FormControl>
-                                </GridItem>
+
+                                {/* Mostrar el campo de alcance solo si selectedType es 3 */}
+                                {showAlcance && (
+                                    <GridItem colSpan={1}>
+                                        <FormControl isRequired isInvalid={errors.alcance}>
+                                            <FormLabel>Alcance</FormLabel>
+                                            <Input
+                                                type='text'
+                                                name='alcance'
+                                                value={formData.alcance}
+                                                onChange={handleInputChange}
+                                            />
+                                            {!errors.alcance ? (
+                                                <FormHelperText>
+                                                    Introduce el alcance de la tarea.
+                                                </FormHelperText>
+                                            ) : (
+                                                <FormErrorMessage>{errors.alcance}</FormErrorMessage>
+                                            )}
+                                        </FormControl>
+                                    </GridItem>
+                                )}
                                 <GridItem colSpan={1}>
                                     <FormControl>
                                         <FormLabel>Asunto</FormLabel>
@@ -274,7 +324,7 @@ const EditButton = ({ task, size }) => {
                                             onChange={handleSelectChange}
                                             placeholder="Seleccione los tags"
                                         >
-                                            {tags.map(tag => (
+                                            {filterOptions.tags.map(tag => (
                                                 <option key={tag} value={tag}>{tag}</option>
                                             ))}
                                         </Select>
@@ -330,7 +380,7 @@ const EditButton = ({ task, size }) => {
                                             onChange={handleSelectChange}
                                             placeholder="Seleccione los usuarios"
                                         >
-                                            {users.map(user => (
+                                            {filterOptions.users.map(user => (
                                                 <option key={user.codigo} value={user.codigo}>{user.denominacion}</option>
                                             ))}
                                         </Select>
