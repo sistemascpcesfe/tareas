@@ -18,6 +18,8 @@ const RepeatButton = ({ colorScheme, task, files, isLoadingFiles, size }) => {
         }
     };
 
+    console.log("ACA", task)
+
     const handleDeleteDateTime = (index) => {
         const newDatesTimes = datesTimes.filter((_, i) => i !== index);
         setDatesTimes(newDatesTimes);
@@ -60,7 +62,8 @@ const RepeatButton = ({ colorScheme, task, files, isLoadingFiles, size }) => {
                     Usuario: task.usuario,
                     Cuerpo: task.cuerpo,
                     Afecta: task.afecta,
-                    Fecha: formatDateNow(new Date())
+                    Fecha: formatDateNow(new Date()),
+                    Privado: task.privado
                 });
                 if (req.Errorid == "00") {
                     toast({

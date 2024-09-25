@@ -120,7 +120,8 @@ const FormDeriveComponent = ({ colorScheme, task }) => {
                     Tarea: task.tarea,
                     Afecta: formData.selectedUsers.join(','),
                     Alcance: task.alcance ?? 'todos',
-                    Origen: task.orden ?? ""
+                    Origen: task.orden ?? "",
+                    Privado: task.privado
                 });
                 if (req.Errorid === "00") {
                     toast({
