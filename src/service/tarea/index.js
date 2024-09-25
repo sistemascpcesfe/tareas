@@ -24,7 +24,7 @@ export const checkTaskService = async (dateStart, dateEnd, tags, tarea, afecta, 
             <Orden xsi:type="xsd:string">${orden || ""}</Orden>
             <Origen xsi:type="xsd:string">${origen || ""}</Origen>
             <Estado xsi:type="xsd:string">${estado || ""}</Estado>
-            <Privado xsi:type="xsd:string">${privado || 0}</Privado>
+            <Privado xsi:type="xsd:string">${privado || ""}</Privado>
           </urn:nube_consultareas>
         </soapenv:Body>
       </soapenv:Envelope>`;
@@ -93,6 +93,7 @@ function extractItemData(item) {
   const estadod = item.querySelector('Estadod')?.textContent || "";
   const estadof = item.querySelector('Estadof')?.textContent || "";
   const afectado = item.querySelector('Afectado')?.textContent || "";
+  const privado = item.querySelector('Privado')?.textContent || "";
 
   return {
     orden,
@@ -111,7 +112,8 @@ function extractItemData(item) {
     estado,
     estadod,
     estadof,
-    afectado
+    afectado,
+    privado
   };
 }
 
@@ -262,7 +264,7 @@ export const createTaskService = async (options) => {
                <Estadod xsi:type="xsd:string"></Estadod>
                <Estadof xsi:type="xsd:string"></Estadof>
                <Afectado xsi:type="xsd:string"></Afectado>
-               <Privado xsi:type="xsd:string">${options?.privado || 0}</Privado>
+               <Privado xsi:type="xsd:string">${options?.Privado}</Privado>
             </Items>
          </urn:nube_altatareas>
       </soapenv:Body>
@@ -270,10 +272,8 @@ export const createTaskService = async (options) => {
     console.log(soapRequest)
 
     const response = await axios.post(SOAP_SERVER_URL, soapRequest);
-    console.log(response)
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(response.data, 'text/xml');
-    console.log(xmlDoc)
     const erroridNode = xmlDoc.querySelector('Errorid');
     const errornombreNode = xmlDoc.querySelector('Errornombre');
     const idNode = xmlDoc.querySelector('Id')
@@ -351,7 +351,6 @@ export const typesTasksService = async () => {
       items: itemData,
     };
 
-    console.log("Tipos: ", jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
@@ -416,7 +415,6 @@ export const tagService = async () => {
       tags: tags,
     };
 
-    console.log("Tags: ", jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
@@ -466,7 +464,6 @@ export const statusTasksService = async () => {
       items: itemData,
     };
 
-    console.log("Estaados: ", jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);
@@ -697,7 +694,6 @@ export const usersService = async () => {
       items: itemData,
     };
 
-    console.log("Usuarios: ", jsonData)
     return jsonData;
   } catch (error) {
     console.error(error);

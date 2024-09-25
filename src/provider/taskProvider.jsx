@@ -16,13 +16,12 @@ export const TaskProvider = ({ children }) => {
         tags: "",
         types: "",
         users: "",
-        status: "" // Asigna el estado por defecto
+        status: ""
     });
     const [filterOptions, setFilterOptions] = useState({ tags: [], users: [], types: [], status: [] });
 
-    const isMounted = useRef(false); // Para controlar el primer montaje
+    const isMounted = useRef(false);
 
-    // Función para obtener los filtros disponibles (tags, users, etc.)
     const getFilters = useCallback(async () => {
         try {
             setLoading(true)
@@ -58,22 +57,19 @@ export const TaskProvider = ({ children }) => {
         }
     }, []);
 
-    // Función para disparar la actualización de tareas
     const triggerUpdate = () => {
         getTask(filters);
     };
 
-    // Se ejecuta una vez cuando el componente se monta para obtener los filtros
     useEffect(() => {
         getFilters();
     }, [getFilters]);
 
-    // Solo ejecuta la consulta de tareas después del primer montaje
     useEffect(() => {
         if (isMounted.current) {
             getTask(filters);
         } else {
-            isMounted.current = true; // Evita que se ejecute en el primer renderizado
+            isMounted.current = true;
         }
     }, [filters, getTask]);
 

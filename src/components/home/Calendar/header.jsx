@@ -68,7 +68,7 @@ const Header = () => {
                         <Button variant='ghost' onClick={goToNextMonth}><FaChevronRight size={20} /></Button>
                     </div>
                     <div className="col-span-2 flex items-center justify-end gap-4">
-                        {/* <ToggleButtonGroup /> */}
+                        <ToggleButtonGroup />
                         <CreateTask />
                         <LogoutButton />
                     </div>

@@ -15,6 +15,8 @@ const DetailComponente = ({ color, task, isLoadingTask, isDefaultOpen }) => {
         downloadFile(file.cuerpo, file.archivo);
     };
 
+    console.log(task)
+
     const getFiles = useCallback(async () => {
         try {
             setIsLoadingFiles(true);
@@ -65,7 +67,8 @@ const DetailComponente = ({ color, task, isLoadingTask, isDefaultOpen }) => {
                                             {[
                                                 { label: "Usuario", value: task.usuario },
                                                 { label: "Afecta", value: usersArray.map((user, index) => <Tag key={index} colorScheme={color} className="mr-2 mb-2">{user.trim()}</Tag>) },
-                                                { label: "Alcance", value: task.alcance }
+                                                { label: "Alcance", value: task.alcance },
+                                                { label: "Seguridad", value: task.privado === "0" ? "Global" : "Privado" }
                                             ].map(({ label, value }, index) => (
                                                 <div className="py-2" key={index}>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">{label}:</label>

@@ -97,7 +97,7 @@ const FormComponent = () => {
             newErrors.selectedUsers = 'Al menos un usuario es requerido.';
         }
 
-        if (formData.privado === null) {
+        if (formData.privado === null || formData.privado === undefined) {
             newErrors.selectedPriv = 'Debe seleccionar si quiere que la tarea sea privada o global.';
         }
 
@@ -124,7 +124,7 @@ const FormComponent = () => {
                     Tarea: formData.selectedType,
                     Afecta: formData.selectedUsers.join(','),
                     Alcance: formData.alcance ? formData.alcance : 'todos',
-                    Privado: formData.privado ? formData.privado : 0
+                    Privado: formData.privado
                 });
 
                 triggerUpdate()
@@ -326,7 +326,7 @@ const FormComponent = () => {
                         <FormControl isRequired isInvalid={errors.selectedPriv}>
                             <FormLabel>Privacidad</FormLabel>
                             <RadioGroup
-                                onChange={(value) => setFormData({ ...formData, privado: parseInt(value, 10) })}
+                                onChange={(value) => setFormData({ ...formData, privado: Number(value) })}
                                 value={formData.privado}
                             >
                                 <Stack direction="row">
@@ -334,6 +334,7 @@ const FormComponent = () => {
                                     <Radio value={1}>Privado</Radio>
                                 </Stack>
                             </RadioGroup>
+
                             {errors.selectedPriv && (
                                 <FormErrorMessage>{errors.selectedPriv}</FormErrorMessage>
                             )}
