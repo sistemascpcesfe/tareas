@@ -69,6 +69,7 @@ const EditButton = ({ task, size }) => {
             selectedTyped: task.codigod,
             selectedUsers: task.afecta.split(','),
             alcance: task.alcance ? task.alcance : '',
+            privado: task.privado
         });
     };
 
@@ -127,10 +128,6 @@ const EditButton = ({ task, size }) => {
     const validate = () => {
         const newErrors = {};
 
-        if (!formData.selectedType) {
-            newErrors.selectedType = 'El tipo es requerido.';
-        }
-
         if (!formData.title) {
             newErrors.title = 'El asunto es requerido.';
         } else if (formData.title.length < 10) {
@@ -173,12 +170,13 @@ const EditButton = ({ task, size }) => {
                     Afecta: formData.selectedUsers.join(','),
                     Alcance: formData.alcance ? formData.alcance : 'todos',
                     Orden: task.orden,
-                    Tarea: formData.selectedType, // Enviar el codigo
-                    Taread: formData.selectedTyped, // Enviar el codigod
+                    Tarea: formData.selectedType ? formData.selectedType : task.tarea, // Enviar el codigo
+                    Taread: formData.selectedTyped ? formData.selectedTyped : task.taread, // Enviar el codigod
+                    Privado: task.privado
                 });
                 toast({
-                    title: 'Tarea Creada',
-                    description: `La tarea se ha creado correctamente. Id: ${req.id}`,
+                    title: `${req.Errornombre}`,
+                    description: `La tarea se ha creado correctamente.`,
                     status: 'success',
                     duration: 5000,
                     isClosable: true,
