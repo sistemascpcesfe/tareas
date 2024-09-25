@@ -99,7 +99,7 @@ const FileComponent = ({ dataFile, colorScheme }) => {
                     type='file'
                     size='xl'
                     onChange={handleFileChange}
-                    accept='.jpg, .png, .pdf, .mp4'
+                    accept='.jpeg, .jpg, .png, .pdf, .mp4'
                     multiple
                 />
                 {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
