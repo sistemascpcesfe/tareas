@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 //Producción: 'http://181.104.2.233/software'
 
 export const SOAP_SERVER_URL = 'http://181.104.2.233/software';
-export const version = "1.0.3"
+export const version = "1.1.0"
 
 export const capitalizeFirstLetter = (str) => {
   if (typeof str === 'string') {

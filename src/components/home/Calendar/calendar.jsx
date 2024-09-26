@@ -73,7 +73,8 @@ const Calendar = () => {
                 Fecha: updatedTask.fecha,
                 Fechav: updatedTask.nuevaFecha,
                 Alcance: updatedTask.alcance,
-                Afecta: updatedTask.afecta
+                Afecta: updatedTask.afecta,
+                Privado: updatedTask.privado
             });
             if (res.Errorid === "00") {
                 toast({
